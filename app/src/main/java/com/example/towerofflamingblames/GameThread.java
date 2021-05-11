@@ -15,20 +15,12 @@ public class GameThread extends Thread {
     private boolean running;
     private GameSurface gameSurface;
     private SurfaceHolder surfaceHolder;
-    public List<IGameObject> gameObjects = new LinkedList<>();
-    private Background background;
+
     private final int MAX_FPS = 30;
 
     public GameThread(GameSurface gameSurface, SurfaceHolder surfaceHolder) {
         this.gameSurface = gameSurface;
         this.surfaceHolder = surfaceHolder;
-
-        this.generateStartingObjects();
-    }
-
-    private void generateStartingObjects(){
-        this.background = new Background();
-        this.gameObjects.add(background);
     }
 
     @Override
@@ -62,7 +54,6 @@ public class GameThread extends Thread {
             long endTime = System.nanoTime();
             long waitTime = (endTime - startTime) / 1000000; // (Change nanoseconds to milliseconds)
             waitTime = targetWaitTimeMilis - waitTime;
-            System.out.print(" Wait Time=" + waitTime);
             try {
                 if(waitTime>0)
                     this.sleep(waitTime);
