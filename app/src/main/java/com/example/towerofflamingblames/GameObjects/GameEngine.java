@@ -1,25 +1,22 @@
 package com.example.towerofflamingblames.GameObjects;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Rect;
 import android.view.MotionEvent;
 
 import com.example.towerofflamingblames.GameState;
 import com.example.towerofflamingblames.GameSurface;
 import com.example.towerofflamingblames.R;
 
-import java.util.ArrayList;
-
-import java.util.List;
+import java.util.Queue;
 
 public class GameEngine {
-    private List<IGameObject> gameObjects = new ArrayList<>();
+    private Queue<IGameObject> gameObjects;
     private GameSurface context;
     private Background background;
     private Player player;
+    private Generator generator;
 
     public GameEngine(GameSurface context) {
         this.context = context;
@@ -29,24 +26,26 @@ public class GameEngine {
                 R.drawable.background_flames));
         this.player = new Player(BitmapFactory.decodeResource(context.getResources(),
                 R.drawable.player_temp), GameState.SCREEN_HEIGHT * GameState.PLAYER_HEIGHT_PERCENTAGE / 100);
-        this.gameObjects.add(new Platform());
+        this.generator = new Generator(context);
+        this.gameObjects = generator.createObjects();
         GameState.platforms = this.gameObjects;
     }
 
-    public void update(){
+    public void update() {
         background.update();
         player.update();
         for (IGameObject gameObject : gameObjects) {
             gameObject.update();
         }
+        generator.update();
     }
 
-    public void draw(Canvas canvas){
+    public void draw(Canvas canvas) {
         background.draw(canvas);
-        player.draw(canvas);
         for (IGameObject gameObject : gameObjects) {
             gameObject.draw(canvas);
         }
+        player.draw(canvas);
     }
 
     public boolean handleEvent(MotionEvent event) {

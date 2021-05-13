@@ -1,28 +1,69 @@
 package com.example.towerofflamingblames.GameObjects;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Rect;
+
+import com.example.towerofflamingblames.GameState;
+import com.example.towerofflamingblames.GameSurface;
+import com.example.towerofflamingblames.R;
 
 public class Platform implements IGameObject{
 
-    private Rect rect;
+    private final Bitmap leftPlatform;
+    private final Bitmap middlePlatform;
+    private final Bitmap rightPlatform;
+    private final Rect rect;
+    private final int number;
+    private final boolean movable;
 
-    public Platform(){
-        this.rect = new Rect(200, 600, 600, 620);
+    public Platform(int left, int top, int number, boolean movable, GameSurface context) {
+        // konwersja grafiki z png na bitmap
+        // platforma zaczyna się leftPlatform, póżniej dana liczba middlePlatform i kończy się rightPlatform
+        leftPlatform = BitmapFactory.decodeResource(context.getResources(), R.drawable.left_platform);
+        middlePlatform = BitmapFactory.decodeResource(context.getResources(), R.drawable.middle_platform);
+        rightPlatform = BitmapFactory.decodeResource(context.getResources(), R.drawable.right_platform);
+        // obszar, który zajmuję platforma jako całość
+        this.rect = new Rect(left, top, left + (2 + number) * GameState.PLATFORM_SIZE, top + GameState.PLATFORM_SIZE);
+        // liczba środkowych kostek platformy
+        this.number = number;
+        // wskazuje, czy to jest ruchoma platforma
+        this.movable = movable;
     }
 
     @Override
     public void update() {
-
+        if (movable) {
+            // jeśli jest to ruchoma platforma, zmieniaj jej położenie x
+            // platforma porusza się na całej długości ekranu
+            if (rect.right + GameState.MOVABLE_X >= GameState.SCREEN_WIDTH ||
+                    rect.left + GameState.MOVABLE_X <= 0) {
+                GameState.MOVABLE_X *= -1;
+            }
+            rect.left += GameState.MOVABLE_X;
+            rect.right += GameState.MOVABLE_X;
+        }
+        // stopniowe opuszczanie platformy
+        rect.top += GameState.MOVABLE_Y;
+        rect.bottom += GameState.MOVABLE_Y;
     }
 
     @Override
     public void draw(Canvas canvas) {
-        Paint paint = new Paint();
-        paint.setColor(Color.rgb(255,50,100));
-        canvas.drawRect(rect, paint);
+        // rysowanie pierwszej kostki leftPlatform
+        Rect tmpRect = new Rect(rect.left, rect.top, rect.left + GameState.PLATFORM_SIZE, rect.bottom);
+        canvas.drawBitmap(leftPlatform, null, tmpRect, null);
+        // rysowanie środkowych kostek middlePlatform
+        for (int i = 0; i < number; i++) {
+            tmpRect.left += GameState.PLATFORM_SIZE;
+            tmpRect.right += GameState.PLATFORM_SIZE;
+            canvas.drawBitmap(middlePlatform, null, tmpRect, null);
+        }
+        // rysowanie ostatniej kostki rightPlatform
+        tmpRect.left += GameState.PLATFORM_SIZE;
+        tmpRect.right += GameState.PLATFORM_SIZE;
+        canvas.drawBitmap(rightPlatform, null, tmpRect, null);
     }
 
     @Override

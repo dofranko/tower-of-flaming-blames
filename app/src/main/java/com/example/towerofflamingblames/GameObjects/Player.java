@@ -33,8 +33,10 @@ public class Player implements IGameObject {
 
     public Player(Bitmap image, int square_size){
         this.image = image;
-        this.pos = new MyVector(200.0f, 200.0f);
-        this.rect = new Rect((int)pos.x,(int)pos.y, (int)pos.x+square_size,(int)pos.y+square_size);
+        this.pos = new MyVector((int)(GameState.SCREEN_WIDTH / 2 - square_size / 2),
+                GameState.SCREEN_HEIGHT - square_size);
+        this.rect = new Rect((int)pos.x,(int)pos.y,
+                (int)pos.x+square_size,(int)pos.y+square_size);
     }
 
     @Override
@@ -52,23 +54,25 @@ public class Player implements IGameObject {
 
         }
         if (pos.y > GameState.SCREEN_HEIGHT - rect.height()) {
-            pos.y = GameState.SCREEN_HEIGHT - rect.height();
+            pos.y = GameState.SCREEN_HEIGHT - rect.height() - 500;
             canJump = true;
         }
         this.rect.set((int) this.pos.x, (int) this.pos.y, (int) this.pos.x + this.rect.width(),
                 (int) this.pos.y + this.rect.height());
-        if (Rect.intersects(getRect(), GameState.platforms.get(0).getRect())) {
-            this.pos.y = GameState.platforms.get(0).getRect().top - getRect().height();
-            this.rect.set((int) this.pos.x, (int) this.pos.y, (int) this.pos.x + this.rect.width(),
-                    (int) this.pos.y + this.rect.height());
-            this.vel.y = 0;
-            canJump = true;
+        for (IGameObject object : GameState.platforms) {
+            if (Rect.intersects(getRect(), object.getRect())) {
+                this.pos.y = object.getRect().top - getRect().height();
+                this.rect.set((int) this.pos.x, (int) this.pos.y, (int) this.pos.x + this.rect.width(),
+                        (int) this.pos.y + this.rect.height());
+                this.vel.y = 0;
+                canJump = true;
+            }
         }
     }
 
     public void jump(){
         if(!canJump) return;
-        this.vel.y = -15.0f;
+        this.vel.y = -20.0f;
         canJump = false;
     }
 
