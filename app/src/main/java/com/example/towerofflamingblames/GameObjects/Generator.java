@@ -13,9 +13,8 @@ public class Generator {
     private final GameSurface context;
     // odlicza dodane platformy, ponieważ co któraś będzie ruchoma
     private int counterPlatforms = 0;
-    // lastLeft i lastTop są to pozycje ostatniej dodanej platformy względem której dodamy nową
-    private int lastLeft = GameState.SCREEN_WIDTH / 2;
-    private int lastTop = GameState.SCREEN_HEIGHT;
+    // ostatnia platforma, która wyznacza lokalizację następnej
+    private IGameObject lastPlatform;
 
     public Generator(GameSurface context){
         this.context = context;
@@ -24,25 +23,27 @@ public class Generator {
     public Queue<IGameObject> createObjects() {
         Queue<IGameObject> objects = new LinkedList<>();
         // podłoga wieży
-        objects.add(new Platform(-50, GameState.SCREEN_HEIGHT - 50, 10, false, context));
+        lastPlatform = new Platform(-50, GameState.SCREEN_HEIGHT - 100, 10, false, context);
+        objects.add(lastPlatform);
         // dodanie widocznych na ekranie platform
+        int lastTop = lastPlatform.getRect().top;
         while (lastTop > 0) {
-            lastTop -= (GameState.SCREEN_HEIGHT  / GameState.PLAYER_HEIGHT_PERCENTAGE);
             addPlatform(objects);
+            lastTop = lastPlatform.getRect().top;
         }
-        // na tej wysokości będą się pojawiać kolejno nowe pokazujące się platformy
-        lastTop -= (GameState.SCREEN_HEIGHT  / GameState.PLAYER_HEIGHT_PERCENTAGE);
         return objects;
     }
 
     public void update() {
         // pierwsza dodana do listy platforma
         IGameObject head = GameState.platforms.peek();
-        Rect peekRect = head.getRect();
-        // jeśli jest poniżej dolnego ekranu usuń ją i dodaj nową na górze
-        if (peekRect.top >= GameState.SCREEN_HEIGHT) {
-            GameState.platforms.remove();
-            addPlatform(GameState.platforms);
+        if (head != null) {
+            Rect peekRect = head.getRect();
+            // jeśli jest poniżej dolnego ekranu usuń ją i dodaj nową na górze
+            if (peekRect.top >= GameState.SCREEN_HEIGHT) {
+                GameState.platforms.remove();
+                addPlatform(GameState.platforms);
+            }
         }
     }
 
@@ -56,11 +57,21 @@ public class Generator {
         }
         // losujemy jej długość z dozwolonego zakresu
         int number = (int)(Math.random() * GameState.MAX_PLATFORM_LENGTH);
+        int left = lastPlatform.getRect().left;
         // jeśli będzie poza ekranem zmieniamy stronę przesuwania platform
-        if (lastLeft + (2 + number) * GameState.PLATFORM_SIZE > GameState.SCREEN_WIDTH || lastLeft < 0) {
+        // prawa ściana
+        if (left + (2 + number) * GameState.PLATFORM_SIZE + GameState.PLATFORM_GAP > GameState.SCREEN_WIDTH) {
             GameState.PLATFORM_GAP *= -1;
+            left = GameState.SCREEN_WIDTH - (2 + number) * GameState.PLATFORM_SIZE;
+        } else if (left + GameState.PLATFORM_GAP < 0) {     // lewa ściana
+            GameState.PLATFORM_GAP *= -1;
+            left = 0;
+        } else {    // brak kolizji
+            left += GameState.PLATFORM_GAP;
         }
-        lastLeft += GameState.PLATFORM_GAP;
-        objects.add(new Platform(lastLeft, lastTop, number, movable, context));
+        // obliczanie wysokości następnej platformy
+        int top = lastPlatform.getRect().top - GameState.SCREEN_HEIGHT / GameState.PLAYER_HEIGHT_PERCENTAGE;
+        lastPlatform = new Platform(left, top, number, movable, context);
+        objects.add(lastPlatform);
     }
 }

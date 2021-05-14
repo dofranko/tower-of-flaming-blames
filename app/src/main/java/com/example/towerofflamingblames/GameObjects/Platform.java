@@ -9,14 +9,17 @@ import com.example.towerofflamingblames.GameState;
 import com.example.towerofflamingblames.GameSurface;
 import com.example.towerofflamingblames.R;
 
+import static java.lang.Math.abs;
+
 public class Platform implements IGameObject{
 
     private final Bitmap leftPlatform;
     private final Bitmap middlePlatform;
     private final Bitmap rightPlatform;
     private final Rect rect;
-    private final int number;
-    private final boolean movable;
+    private final int number;   // liczba środkowych kostek platformy
+    private final boolean movable;  // flaga wskazująca czy jest to ruchoma platforma
+    private int movableX = GameState.MOVABLE_X; // prędkość porszunia się plaform
 
     public Platform(int left, int top, int number, boolean movable, GameSurface context) {
         // konwersja grafiki z png na bitmap
@@ -36,13 +39,18 @@ public class Platform implements IGameObject{
     public void update() {
         if (movable) {
             // jeśli jest to ruchoma platforma, zmieniaj jej położenie x
-            // platforma porusza się na całej długości ekranu
-            if (rect.right + GameState.MOVABLE_X >= GameState.SCREEN_WIDTH ||
-                    rect.left + GameState.MOVABLE_X <= 0) {
-                GameState.MOVABLE_X *= -1;
+            // sprawdza, czy poruszanie platform zostalo zmienione w trakcie gry
+            if (abs(movableX) != GameState.MOVABLE_X) {
+                movableX /= movableX;   // dostajemy -1 albo 1
+                movableX *= GameState.MOVABLE_X;
             }
-            rect.left += GameState.MOVABLE_X;
-            rect.right += GameState.MOVABLE_X;
+            // platforma porusza się na całej długości ekranu
+            if (rect.right + movableX >= GameState.SCREEN_WIDTH ||
+                    rect.left + movableX <= 0) {
+                movableX *= -1;
+            }
+            rect.left += movableX;
+            rect.right += movableX;
         }
         // stopniowe opuszczanie platformy
         rect.top += GameState.MOVABLE_Y;
