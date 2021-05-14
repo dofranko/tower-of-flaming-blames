@@ -3,6 +3,10 @@ package com.example.towerofflamingblames.GameObjects;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.view.MotionEvent;
 
 import com.example.towerofflamingblames.GameState;
@@ -11,15 +15,15 @@ import com.example.towerofflamingblames.R;
 
 import java.util.Queue;
 
-public class GameEngine {
-    private Queue<IGameObject> gameObjects;
-    private GameSurface context;
-    private Background background;
-    private Player player;
-    private Generator generator;
+import static android.content.Context.SENSOR_SERVICE;
+
+public class GameEngine implements SensorEventListener {
+    private final Queue<IGameObject> gameObjects;
+    private final Background background;
+    private final Player player;
+    private final Generator generator;
 
     public GameEngine(GameSurface context) {
-        this.context = context;
         GameState.SCREEN_WIDTH = Resources.getSystem().getDisplayMetrics().widthPixels;
         GameState.SCREEN_HEIGHT = Resources.getSystem().getDisplayMetrics().heightPixels;
         background = new Background(BitmapFactory.decodeResource(context.getResources(),
@@ -29,6 +33,10 @@ public class GameEngine {
         this.generator = new Generator(context);
         this.gameObjects = generator.createObjects();
         GameState.platforms = this.gameObjects;
+        // tworzenie reagowania na przechylenia telefonu
+        SensorManager sensorManager = (SensorManager) context.getContext().getSystemService(SENSOR_SERVICE);
+        Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
     }
 
     public void update() {
@@ -52,15 +60,30 @@ public class GameEngine {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_MOVE: {
-                if (event.getY() > GameState.SCREEN_HEIGHT / 2) {
+                if (event.getY() > (float) GameState.SCREEN_HEIGHT / 2) {
                     player.jump();
-                } else if (event.getX() < GameState.SCREEN_WIDTH / 2) {
-                    player.setVelocity(-10);
+                } else if (event.getX() < (float) GameState.SCREEN_WIDTH / 2) {
+                    player.setVelocity(-15);
                 } else {
-                    player.setVelocity(10);
+                    player.setVelocity(15);
                 }
             }
         }
         return true;
     }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        // dla wartości [-2,2] nie reagujemy, by telefon nie był taki czuły na przechylenia
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            if (event.values[0] > 2) {
+                player.setVelocity(-15);
+            } else if (event.values[0] < -2) {
+                player.setVelocity(15);
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 }
