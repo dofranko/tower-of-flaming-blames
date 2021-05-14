@@ -3,12 +3,8 @@ package com.example.towerofflamingblames.GameObjects;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.util.Log;
 
 import com.example.towerofflamingblames.GameState;
-import com.example.towerofflamingblames.R;
-
-import java.io.Console;
 
 public class Player implements IGameObject {
 
@@ -46,8 +42,9 @@ public class Player implements IGameObject {
         this.pos.y += (int) (this.vel.y + 0.5f * this.acc.y);
 
         this.vel.x *= 0.9;
-
-        this.pos.x += (this.vel.x);
+        if (this.pos.x + this.vel.x >= 0 && this.getRect().right + this.vel.x <= GameState.SCREEN_WIDTH) {
+            this.pos.x += (this.vel.x);
+        }
 
         if (Math.abs(this.vel.x) < 0.001f) {
             this.vel.x = 0.0f;
@@ -60,12 +57,13 @@ public class Player implements IGameObject {
         this.rect.set((int) this.pos.x, (int) this.pos.y, (int) this.pos.x + this.rect.width(),
                 (int) this.pos.y + this.rect.height());
         for (IGameObject object : GameState.platforms) {
-            if (Rect.intersects(getRect(), object.getRect())) {
-                this.pos.y = object.getRect().top - getRect().height();
-                this.rect.set((int) this.pos.x, (int) this.pos.y, (int) this.pos.x + this.rect.width(),
-                        (int) this.pos.y + this.rect.height());
-                this.vel.y = 0;
-                canJump = true;
+            if (Rect.intersects(this.getRect(), object.getRect())) {
+                if (this.getRect().bottom < object.getRect().top + GameState.PLATFORM_SIZE / 4 &&
+                        this.vel.y > 0) {
+                    this.pos.y = object.getRect().top - getRect().height();
+                    this.vel.y = 0;
+                    canJump = true;
+                }
             }
         }
     }

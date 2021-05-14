@@ -20,5 +20,7 @@ public class GameState {
     // co ile plaform ma się pojawiać ruchoma platforma
     public static int COUNTER_MOVABLE_PLATFORMS = 5;
     // odległość pomiędzy sąsiednimi platformami w szerokości
-    public static int PLATFORM_GAP = 100;
+    public static int PLATFORM_GAP_X = 100;
+    // odległość pomiędzy sąsiednimi platformami w wysokości
+    public static int PLATFORM_GAP_Y;
 }

@@ -18,6 +18,7 @@ public class Generator {
 
     public Generator(GameSurface context){
         this.context = context;
+        GameState.PLATFORM_GAP_Y = (int)(GameState.SCREEN_HEIGHT / GameState.PLAYER_HEIGHT_PERCENTAGE * 1.8);
     }
 
     public Queue<IGameObject> createObjects() {
@@ -60,17 +61,17 @@ public class Generator {
         int left = lastPlatform.getRect().left;
         // jeśli będzie poza ekranem zmieniamy stronę przesuwania platform
         // prawa ściana
-        if (left + (2 + number) * GameState.PLATFORM_SIZE + GameState.PLATFORM_GAP > GameState.SCREEN_WIDTH) {
-            GameState.PLATFORM_GAP *= -1;
+        if (left + (2 + number) * GameState.PLATFORM_SIZE + GameState.PLATFORM_GAP_X > GameState.SCREEN_WIDTH) {
+            GameState.PLATFORM_GAP_X *= -1;
             left = GameState.SCREEN_WIDTH - (2 + number) * GameState.PLATFORM_SIZE;
-        } else if (left + GameState.PLATFORM_GAP < 0) {     // lewa ściana
-            GameState.PLATFORM_GAP *= -1;
+        } else if (left + GameState.PLATFORM_GAP_X < 0) {     // lewa ściana
+            GameState.PLATFORM_GAP_X *= -1;
             left = 0;
         } else {    // brak kolizji
-            left += GameState.PLATFORM_GAP;
+            left += GameState.PLATFORM_GAP_X;
         }
         // obliczanie wysokości następnej platformy
-        int top = lastPlatform.getRect().top - GameState.SCREEN_HEIGHT / GameState.PLAYER_HEIGHT_PERCENTAGE;
+        int top = lastPlatform.getRect().top - GameState.PLATFORM_GAP_Y;
         lastPlatform = new Platform(left, top, number, movable, context);
         objects.add(lastPlatform);
     }
