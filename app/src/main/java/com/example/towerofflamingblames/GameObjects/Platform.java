@@ -11,7 +11,7 @@ import com.example.towerofflamingblames.R;
 
 import static java.lang.Math.abs;
 
-public class Platform implements IGameObject{
+public class Platform implements IGameObject {
 
     private final Bitmap leftPlatform;
     private final Bitmap middlePlatform;

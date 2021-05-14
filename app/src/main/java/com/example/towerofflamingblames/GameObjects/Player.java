@@ -1,17 +1,26 @@
 package com.example.towerofflamingblames.GameObjects;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
 
 import com.example.towerofflamingblames.GameState;
+import com.example.towerofflamingblames.GameSurface;
+import com.example.towerofflamingblames.R;
+
+import java.util.ArrayList;
 
 public class Player implements IGameObject {
 
-    private  Rect rect;
-    private Bitmap image;
+    private final Rect rect;
+    private final Bitmap image;
     private boolean canJump = false;
-    private class MyVector{
+    private int coins = 0;
+    private final Paint paint;
+    private static class MyVector{
         public float x;
         public float y;
         public MyVector(){
@@ -23,16 +32,19 @@ public class Player implements IGameObject {
             this.y = y;
         }
     }
-    private MyVector vel = new MyVector();
-    private MyVector acc = new MyVector(0.0f, 0.8f);
-    private MyVector pos;
+    private final MyVector vel = new MyVector();
+    private final MyVector acc = new MyVector(0.0f, 0.8f);
+    private final MyVector pos;
 
     public Player(Bitmap image, int square_size){
         this.image = image;
-        this.pos = new MyVector((int)(GameState.SCREEN_WIDTH / 2 - square_size / 2),
+        this.pos = new MyVector((int) (GameState.SCREEN_WIDTH / 2 - square_size / 2),
                 GameState.SCREEN_HEIGHT - square_size);
         this.rect = new Rect((int)pos.x,(int)pos.y,
                 (int)pos.x+square_size,(int)pos.y+square_size);
+        this.paint = new Paint();
+        paint.setColor(Color.WHITE);
+        paint.setTextSize(80);
     }
 
     @Override
@@ -56,14 +68,24 @@ public class Player implements IGameObject {
         }
         this.rect.set((int) this.pos.x, (int) this.pos.y, (int) this.pos.x + this.rect.width(),
                 (int) this.pos.y + this.rect.height());
+
+        // iterowanie po platformach w celu sprawdzenia kolizji
         for (IGameObject object : GameState.platforms) {
-            if (Rect.intersects(this.getRect(), object.getRect())) {
+            if (Rect.intersects(this.rect, object.getRect())) {
                 if (this.getRect().bottom < object.getRect().top + GameState.PLATFORM_SIZE / 4 &&
                         this.vel.y > 0) {
                     this.pos.y = object.getRect().top - getRect().height();
                     this.vel.y = 0;
                     canJump = true;
                 }
+            }
+        }
+
+        // iterowanie po artefaktach w celu sprawdzenia kolizji
+        for (int i = 0; i < GameState.artefacts.size(); i++) {
+            if (Rect.intersects(this.rect, GameState.artefacts.get(i).getRect())) {
+                GameState.artefacts.get(i).action(this);
+                GameState.artefacts.remove(i);
             }
         }
     }
@@ -77,6 +99,7 @@ public class Player implements IGameObject {
     @Override
     public void draw(Canvas canvas) {
         canvas.drawBitmap(image, null, rect, null);
+        canvas.drawText(String.valueOf(coins), 120, 80, paint);
     }
 
     @Override
@@ -86,5 +109,9 @@ public class Player implements IGameObject {
 
     public void setVelocity(float x){
         this.vel.x = x;
+    }
+
+    public void addCoin() {
+        coins += 1;
     }
 }

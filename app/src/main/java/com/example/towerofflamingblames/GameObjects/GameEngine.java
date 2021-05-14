@@ -18,7 +18,6 @@ import java.util.Queue;
 import static android.content.Context.SENSOR_SERVICE;
 
 public class GameEngine implements SensorEventListener {
-    private final Queue<IGameObject> gameObjects;
     private final Background background;
     private final Player player;
     private final Generator generator;
@@ -31,8 +30,7 @@ public class GameEngine implements SensorEventListener {
         this.player = new Player(BitmapFactory.decodeResource(context.getResources(),
                 R.drawable.player_temp), GameState.SCREEN_HEIGHT * GameState.PLAYER_HEIGHT_PERCENTAGE / 100);
         this.generator = new Generator(context);
-        this.gameObjects = generator.createObjects();
-        GameState.platforms = this.gameObjects;
+        generator.createObjects();
         // tworzenie reagowania na przechylenia telefonu
         SensorManager sensorManager = (SensorManager) context.getContext().getSystemService(SENSOR_SERVICE);
         Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -41,18 +39,13 @@ public class GameEngine implements SensorEventListener {
 
     public void update() {
         background.update();
-        player.update();
-        for (IGameObject gameObject : gameObjects) {
-            gameObject.update();
-        }
         generator.update();
+        player.update();
     }
 
     public void draw(Canvas canvas) {
         background.draw(canvas);
-        for (IGameObject gameObject : gameObjects) {
-            gameObject.draw(canvas);
-        }
+        generator.draw(canvas);
         player.draw(canvas);
     }
 
