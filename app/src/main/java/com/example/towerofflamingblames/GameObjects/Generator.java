@@ -29,6 +29,10 @@ public class Generator {
     public void createObjects() {
         // podłoga wieży
         GameState.platforms.add(new Platform(-50, GameState.SCREEN_HEIGHT - 100, 10, false, context));
+        // dodanie pierwszego schodka
+        int left = GameState.SCREEN_WIDTH / 2 - GameState.PLATFORM_SIZE * 2;
+        int top = GameState.platforms.getLast().getRect().top - GameState.PLATFORM_GAP_Y;
+        GameState.platforms.add(new Platform(left, top, 3, false, context));
         // dodanie widocznych na ekranie platform
         while (GameState.platforms.getLast().getRect().top > 0) {
             addPlatform();
