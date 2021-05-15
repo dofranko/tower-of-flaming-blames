@@ -1,67 +1,82 @@
 package com.example.towerofflamingblames.GameObjects;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Rect;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.view.MotionEvent;
 
 import com.example.towerofflamingblames.GameState;
 import com.example.towerofflamingblames.GameSurface;
 import com.example.towerofflamingblames.R;
 
-import java.util.ArrayList;
+import java.util.Queue;
 
-import java.util.List;
+import static android.content.Context.SENSOR_SERVICE;
 
-public class GameEngine {
-    private List<IGameObject> gameObjects = new ArrayList<>();
-    private GameSurface context;
-    private Background background;
-    private Player player;
+public class GameEngine implements SensorEventListener {
+    private final Background background;
+    private final Player player;
+    private final Generator generator;
 
     public GameEngine(GameSurface context) {
-        this.context = context;
         GameState.SCREEN_WIDTH = Resources.getSystem().getDisplayMetrics().widthPixels;
         GameState.SCREEN_HEIGHT = Resources.getSystem().getDisplayMetrics().heightPixels;
         background = new Background(BitmapFactory.decodeResource(context.getResources(),
                 R.drawable.background_flames));
         this.player = new Player(BitmapFactory.decodeResource(context.getResources(),
                 R.drawable.player_temp), GameState.SCREEN_HEIGHT * GameState.PLAYER_HEIGHT_PERCENTAGE / 100);
-        this.gameObjects.add(new Platform());
-        GameState.platforms = this.gameObjects;
+        this.generator = new Generator(context);
+        generator.createObjects();
+        // tworzenie reagowania na przechylenia telefonu
+        SensorManager sensorManager = (SensorManager) context.getContext().getSystemService(SENSOR_SERVICE);
+        Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
     }
 
-    public void update(){
+    public void update() {
         background.update();
+        generator.update();
         player.update();
-        for (IGameObject gameObject : gameObjects) {
-            gameObject.update();
-        }
     }
 
-    public void draw(Canvas canvas){
+    public void draw(Canvas canvas) {
         background.draw(canvas);
+        generator.draw(canvas);
         player.draw(canvas);
-        for (IGameObject gameObject : gameObjects) {
-            gameObject.draw(canvas);
-        }
     }
 
     public boolean handleEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_MOVE: {
-                if (event.getY() > GameState.SCREEN_HEIGHT / 2) {
+                if (event.getY() > (float) GameState.SCREEN_HEIGHT / 2) {
                     player.jump();
-                } else if (event.getX() < GameState.SCREEN_WIDTH / 2) {
-                    player.setVelocity(-10);
+                } else if (event.getX() < (float) GameState.SCREEN_WIDTH / 2) {
+                    player.setVelocity(-15);
                 } else {
-                    player.setVelocity(10);
+                    player.setVelocity(15);
                 }
             }
         }
         return true;
     }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        // dla wartości [-2,2] nie reagujemy, by telefon nie był taki czuły na przechylenia
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            if (event.values[0] > 2) {
+                player.setVelocity(-15);
+            } else if (event.values[0] < -2) {
+                player.setVelocity(15);
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 }

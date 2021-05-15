@@ -27,9 +27,7 @@ public class Background implements  IGameObject{
     }
 
     @Override
-    public void update() {
-
-    }
+    public void update() {}
 
     @Override
     public Rect getRect() {
