@@ -46,7 +46,8 @@ public class GameEngine implements SensorEventListener {
         generator.update();
         player.update();
         if (player.getRect().bottom >= GameState.SCREEN_HEIGHT) {
-            this.activity.endGame();
+            int coins = this.player.getCoins();
+            this.activity.endGame(coins);
         }
     }
 

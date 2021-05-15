@@ -103,6 +103,10 @@ public class Player implements IGameObject {
         return this.rect;
     }
 
+    public int getCoins() {
+        return this.coins;
+    }
+
     public void setVelocity(float x){
         this.vel.x = x;
     }
