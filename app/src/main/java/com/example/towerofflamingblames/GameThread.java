@@ -56,7 +56,7 @@ public class GameThread extends Thread {
             waitTime = targetWaitTimeMilis - waitTime;
             try {
                 if(waitTime>0)
-                    this.sleep(waitTime);
+                    sleep(waitTime);
             }
             catch (InterruptedException e) {
                 Log.d("Thread.sleep", e.getMessage());

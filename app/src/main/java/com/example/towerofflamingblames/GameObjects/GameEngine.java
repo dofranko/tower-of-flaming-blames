@@ -1,5 +1,6 @@
 package com.example.towerofflamingblames.GameObjects;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -9,6 +10,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.view.MotionEvent;
 
+import com.example.towerofflamingblames.GameActivity;
 import com.example.towerofflamingblames.GameState;
 import com.example.towerofflamingblames.GameSurface;
 import com.example.towerofflamingblames.R;
@@ -21,15 +23,17 @@ public class GameEngine implements SensorEventListener {
     private final Background background;
     private final Player player;
     private final Generator generator;
+    private final GameActivity activity;
 
-    public GameEngine(GameSurface context) {
+    public GameEngine(GameSurface context, GameActivity activity) {
+        this.activity = activity;
         GameState.SCREEN_WIDTH = Resources.getSystem().getDisplayMetrics().widthPixels;
         GameState.SCREEN_HEIGHT = Resources.getSystem().getDisplayMetrics().heightPixels;
         background = new Background(BitmapFactory.decodeResource(context.getResources(),
                 R.drawable.background_flames));
+        this.generator = new Generator(context);
         this.player = new Player(BitmapFactory.decodeResource(context.getResources(),
                 R.drawable.player_temp), GameState.SCREEN_HEIGHT * GameState.PLAYER_HEIGHT_PERCENTAGE / 100);
-        this.generator = new Generator(context);
         generator.createObjects();
         // tworzenie reagowania na przechylenia telefonu
         SensorManager sensorManager = (SensorManager) context.getContext().getSystemService(SENSOR_SERVICE);
@@ -41,6 +45,9 @@ public class GameEngine implements SensorEventListener {
         background.update();
         generator.update();
         player.update();
+        if (player.getRect().bottom >= GameState.SCREEN_HEIGHT) {
+            this.activity.endGame();
+        }
     }
 
     public void draw(Canvas canvas) {

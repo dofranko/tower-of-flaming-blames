@@ -9,7 +9,7 @@ import com.example.towerofflamingblames.GameState;
 import com.example.towerofflamingblames.GameSurface;
 import com.example.towerofflamingblames.R;
 
-public class Coin implements IGameObject, IGameArtefact {
+public class Coin implements IGameArtefact {
 
     private final Bitmap[] frames;
     private int currentBitmap = 0;

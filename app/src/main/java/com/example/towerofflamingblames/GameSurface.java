@@ -16,9 +16,11 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
 
     private GameThread gameThread;
     private GameEngine gameEngine;
+    private final GameActivity context;
 
-    public GameSurface(Context context) {
+    public GameSurface(GameActivity context) {
         super(context);
+        this.context = context;
         this.setFocusable(true);
         this.getHolder().addCallback(this);
     }
@@ -26,7 +28,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
         this.gameThread = new GameThread(this, holder);
-        this.gameEngine = new GameEngine(this);
+        this.gameEngine = new GameEngine(this, this.context);
         this.gameThread.setRunning(true);
         this.gameThread.start();
     }
@@ -46,7 +48,9 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            retry = true;
+            retry = false;
+            GameState.platforms.clear();
+            GameState.artefacts.clear();
         }
     }
 
