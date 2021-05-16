@@ -26,21 +26,23 @@
                 android:layout_weight="2" >
 
                 <TextView
-                    android:id="@+id/title"
+                    android:id="@+id/email"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
                     android:layout_weight="4"
-                    android:text="TextView" />
+                    android:text="TextView"
+                    android:textColor="#FBF9F9"
+                    android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/priority"
+                    android:id="@+id/score"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
                     android:layout_weight="2"
                     android:gravity="right"
-                    android:text="TextView" />
+                    android:text="TextView"
+                    android:textColor="#F1ECEC" />
             </TableRow>
 
             <TableRow
@@ -50,20 +52,22 @@
                 android:layout_weight="2" >
 
                 <TextView
-                    android:id="@+id/description"
+                    android:id="@+id/name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="4"
-                    android:text="TextView" />
+                    android:text="TextView"
+                    android:textColor="#F8F3F3" />
 
                 <TextView
                     android:id="@+id/date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
-                    android:gravity="right"
                     android:layout_weight="2"
-                    android:text="TextView" />
+                    android:gravity="right"
+                    android:text="TextView"
+                    android:textColor="#F3F0F0" />
             </TableRow>
 
         </TableLayout>

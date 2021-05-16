@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.example.towerofflamingblames.GameStatistics.StatisticsActivity;
+import com.example.towerofflamingblames.GameStatistics.StatisticsTypeActivity;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -101,7 +103,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showStatistics(View view) {
-
+        Intent intent = new Intent(this, StatisticsTypeActivity.class);
+        startActivity(intent);
     }
 
     public void play(View view) {
