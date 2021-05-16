@@ -21,7 +21,7 @@ public class GameActivity extends AppCompatActivity {
 
     public void endGame(int coins) {
         Intent returnIntent = new Intent();
-        returnIntent.putExtra("coins", coins);
+        returnIntent.putExtra("coins", String.valueOf(coins));
         setResult(Activity.RESULT_OK, returnIntent);
         finish();
     }

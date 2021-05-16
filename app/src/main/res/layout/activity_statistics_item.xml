@@ -2,8 +2,9 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
     <TableRow
         android:id="@+id/tableRow"
@@ -17,7 +18,8 @@
         <TableLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="2" >
+            android:layout_weight="2"
+            tools:ignore="UselessParent">
 
             <TableRow
                 android:layout_width="match_parent"
@@ -30,19 +32,18 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="4"
-                    android:text="TextView"
-                    android:textColor="#FBF9F9"
+                    android:textColor="#F60303"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/score"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="10dp"
+                    android:layout_marginEnd="10dp"
                     android:layout_weight="2"
                     android:gravity="right"
-                    android:text="TextView"
-                    android:textColor="#F1ECEC" />
+                    android:textColor="#F80303"
+                    tools:ignore="RtlHardcoded" />
             </TableRow>
 
             <TableRow
@@ -56,8 +57,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="4"
-                    android:text="TextView"
-                    android:textColor="#F8F3F3" />
+                    android:textColor="#F40202" />
 
                 <TextView
                     android:id="@+id/date"
@@ -66,8 +66,8 @@
                     android:layout_marginRight="10dp"
                     android:layout_weight="2"
                     android:gravity="right"
-                    android:text="TextView"
-                    android:textColor="#F3F0F0" />
+                    android:textColor="#FA0202"
+                    tools:ignore="RtlHardcoded" />
             </TableRow>
 
         </TableLayout>

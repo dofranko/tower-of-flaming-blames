@@ -1,5 +1,6 @@
 package com.example.towerofflamingblames.GameStatistics;
 
+// dane do wyświetlania w recycleView
 public class StatisticsGame {
 
     public String email;

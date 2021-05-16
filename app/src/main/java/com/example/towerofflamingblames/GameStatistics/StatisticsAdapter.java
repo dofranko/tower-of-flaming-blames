@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
+// Szablon Adaptera dla recycleView
 public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.ViewHolder>{
     private final ArrayList<StatisticsGame> listData;
 
