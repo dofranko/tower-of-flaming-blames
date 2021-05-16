@@ -18,6 +18,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -87,8 +88,24 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 }
                             }
-                            myRef.child("Highest").child("Scores").setValue(highestScores);
-                            myRef.child("Highest").child("Date").setValue(date);
+                            final int currentHighestScores = highestScores;
+                            final String currentDate = date;
+                            myRef.child("Highest").child("Scores").get().addOnCompleteListener(secondTask -> {
+                                if (secondTask.isSuccessful()) {
+                                    int previousCoins = 0;
+                                    if (secondTask.getResult() != null) {
+                                        previousCoins = Objects.requireNonNull(secondTask.getResult().getValue(int.class));
+                                    }
+                                    if (previousCoins <= currentHighestScores) {
+                                        myRef.child("Highest").child("Scores").setValue(currentHighestScores);
+                                        myRef.child("Highest").child("Date").setValue(currentDate);
+                                    }
+                                } else {
+                                    myRef.child("Highest").child("Scores").setValue(currentHighestScores);
+                                    myRef.child("Highest").child("Date").setValue(currentDate);
+                                }
+                            });
+
                         }
                     }
                 });
