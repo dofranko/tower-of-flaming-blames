@@ -34,7 +34,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // tworzenie okna logowania
+        createLogin();
+    }
+
+    // tworzenie okna logowania
+    private void createLogin() {
         startActivityForResult(
                 AuthUI.getInstance()
                         .createSignInIntentBuilder()
@@ -56,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
                     myRef.child("Name").setValue(this.user.getDisplayName());
                     myRef.child("Email").setValue(this.user.getEmail());
                 }
+            } else {
+                createLogin();
             }
         } else if (requestCode == RC_GAME) {
             if (resultCode == RESULT_OK) {
@@ -70,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
                         DataSnapshot dataSnapshot = task.getResult();
                         if (dataSnapshot != null) {
                             // maksymalnie zapisuje 10 ostatnich gier gracza
-                            if (dataSnapshot.getChildrenCount() > 2) {
+                            if (dataSnapshot.getChildrenCount() > 10) {
                                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                                     ds.getRef().removeValue();
                                     break;
