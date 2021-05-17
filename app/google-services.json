@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "460365147434",
+    "project_id": "towerofblamingflames",
+    "storage_bucket": "towerofblamingflames.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:460365147434:android:4c29401b5c935465860253",
+        "android_client_info": {
+          "package_name": "com.example.towerofflamingblames"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "460365147434-fimapi064kdb9tq2ktgagd0n12qcleut.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUTX7lCT68vMZKSMklXN4PbMoqNWYXGww"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "460365147434-fimapi064kdb9tq2ktgagd0n12qcleut.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
