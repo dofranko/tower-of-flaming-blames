@@ -78,7 +78,7 @@ public class StatisticsActivity extends AppCompatActivity {
                         }
                     }
                     // tworzenie pozycji w recyclerView
-                    for (int i = 0; i < dates.size(); i++) {
+                    for (int i = dates.size()-1; i >= 0; i--) {
                         String date = dates.get(i).replace("T", " ");
                         StatisticsGame statisticsGame = new StatisticsGame("", scores.get(i), name.get(i), date);
                         this.listData.add(statisticsGame);
