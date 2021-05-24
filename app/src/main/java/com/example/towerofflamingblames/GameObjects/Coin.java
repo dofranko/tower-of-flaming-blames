@@ -28,11 +28,12 @@ public class Coin implements IGameArtefact {
     }
 
     @Override
-    public void update() {
+    public void update(float deltaTime) {
         // stopniowe opuszczanie monet
-        rect.top += GameState.MOVABLE_Y;
-        rect.bottom += GameState.MOVABLE_Y;
-        // co trzy wywołania funkcji zmieniaj zdjęcie
+        int temp = (int) (GameState.MOVABLE_Y * deltaTime);
+        rect.top += temp;
+        rect.bottom += temp;
+        // co trzy wywołania funkcji zmieniaj zdjęcie (TODO można dodać do tego delta time)
         changingTime += 1;
         if (changingTime == 3) {
             currentBitmap += 1;

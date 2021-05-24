@@ -4,7 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 
 public interface IGameObject {
-    void update();
+    void update(float deltaTime);
     void draw(Canvas canvas);
     Rect getRect();
 }

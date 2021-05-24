@@ -25,7 +25,7 @@ public class GameThread extends Thread {
 
     @Override
     public void run() {
-        long startTime;
+        long startTime, deltaTime = 30;
         long targetWaitTimeMilis = 1000/MAX_FPS;
 
         while (running) {
@@ -36,7 +36,7 @@ public class GameThread extends Thread {
                 // Get Canvas from Holder and lock it.
                 canvas = this.surfaceHolder.lockCanvas();
                 synchronized (canvas) {
-                    this.gameSurface.update();
+                    this.gameSurface.update(((float)deltaTime)/10);
                     this.gameSurface.draw(canvas);
                 }
             }
@@ -51,9 +51,7 @@ public class GameThread extends Thread {
             }
 
             // Calculating wait time
-            long endTime = System.nanoTime();
-            long waitTime = (endTime - startTime) / 1000000; // (Change nanoseconds to milliseconds)
-            waitTime = targetWaitTimeMilis - waitTime;
+            long waitTime = targetWaitTimeMilis -((System.nanoTime() - startTime) / 1000000);
             try {
                 if(waitTime>0)
                     sleep(waitTime);
@@ -61,6 +59,7 @@ public class GameThread extends Thread {
             catch (InterruptedException e) {
                 Log.d("Thread.sleep", e.getMessage());
             }
+            deltaTime = (System.nanoTime() - startTime)/1000000;
         }
     }
 

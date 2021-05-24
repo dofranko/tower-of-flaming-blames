@@ -57,8 +57,8 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
     /**
      * Wywołuje update() silnika gry
      */
-    public void update() {
-        this.gameEngine.update();
+    public void update(float deltaTime) {
+        this.gameEngine.update(deltaTime > 0 ? deltaTime : 1);
     }
 
     /**

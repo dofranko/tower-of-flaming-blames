@@ -19,7 +19,8 @@ public class Platform implements IGameObject {
     private final Rect rect;
     private final int number;   // liczba środkowych kostek platformy
     private final boolean movable;  // flaga wskazująca czy jest to ruchoma platforma
-    private int movableX = GameState.MOVABLE_X; // prędkość porszunia się plaform
+    private final float speedMultiplier = 1.0f; //TODO (np random) modyfikator lokalny prędkości poruszania się platformy
+    private int direction = 1; //kierunek poruszania, 1 -> w prawo, -1 w lewo
 
     public Platform(int left, int top, int number, boolean movable, GameSurface context) {
         // konwersja grafiki z png na bitmap
@@ -36,25 +37,20 @@ public class Platform implements IGameObject {
     }
 
     @Override
-    public void update() {
+    public void update(float deltaTime) {
         if (movable) {
-            // jeśli jest to ruchoma platforma, zmieniaj jej położenie x
-            // sprawdza, czy poruszanie platform zostalo zmienione w trakcie gry
-            if (abs(movableX) != GameState.MOVABLE_X) {
-                movableX /= movableX;   // dostajemy -1 albo 1
-                movableX *= GameState.MOVABLE_X;
-            }
+            int temp = (int) (GameState.MOVABLE_X * deltaTime * direction * speedMultiplier);;
+            rect.left += temp;
+            rect.right += temp;
             // platforma porusza się na całej długości ekranu
-            if (rect.right + movableX >= GameState.SCREEN_WIDTH ||
-                    rect.left + movableX <= 0) {
-                movableX *= -1;
+            if ((rect.right >= GameState.SCREEN_WIDTH && direction == 1) || (rect.left<= 0 && direction == -1)) {
+                direction *= -1;
             }
-            rect.left += movableX;
-            rect.right += movableX;
         }
         // stopniowe opuszczanie platformy
-        rect.top += GameState.MOVABLE_Y;
-        rect.bottom += GameState.MOVABLE_Y;
+        int temp = (int) (GameState.MOVABLE_Y * deltaTime);
+        rect.top += temp;
+        rect.bottom += temp;
     }
 
     @Override

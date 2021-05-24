@@ -1,6 +1,5 @@
 package com.example.towerofflamingblames.GameObjects;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -8,14 +7,13 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import com.example.towerofflamingblames.GameActivity;
 import com.example.towerofflamingblames.GameState;
 import com.example.towerofflamingblames.GameSurface;
 import com.example.towerofflamingblames.R;
-
-import java.util.Queue;
 
 import static android.content.Context.SENSOR_SERVICE;
 
@@ -24,6 +22,10 @@ public class GameEngine implements SensorEventListener {
     private final Player player;
     private final Generator generator;
     private final GameActivity activity;
+    private float[] accelOutput;
+    private float[] magOutput;
+    private float[] orientation = new float[3];
+    private float[] startOrientation = null;
 
     public GameEngine(GameSurface context, GameActivity activity) {
         this.activity = activity;
@@ -38,13 +40,16 @@ public class GameEngine implements SensorEventListener {
         // tworzenie reagowania na przechylenia telefonu
         SensorManager sensorManager = (SensorManager) context.getContext().getSystemService(SENSOR_SERVICE);
         Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
+        Sensor magnometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
+        sensorManager.registerListener(this, magnometer, SensorManager.SENSOR_DELAY_GAME);
     }
 
-    public void update() {
-        background.update();
-        generator.update();
-        player.update();
+    public void update(float deltaTime) {
+        player.update(deltaTime);
+        background.update(deltaTime);
+        generator.update(deltaTime);
+        player.updateFallingPosition(deltaTime);
         if (player.getRect().bottom >= GameState.SCREEN_HEIGHT) {
             int coins = this.player.getCoins();
             this.activity.endGame(coins);
@@ -64,9 +69,9 @@ public class GameEngine implements SensorEventListener {
                 if (event.getY() > (float) GameState.SCREEN_HEIGHT / 2) {
                     player.jump();
                 } else if (event.getX() < (float) GameState.SCREEN_WIDTH / 2) {
-                    player.setVelocity(-15);
+                    player.setHorizontalVelocity(-2);
                 } else {
-                    player.setVelocity(15);
+                    player.setHorizontalVelocity(2);
                 }
             }
         }
@@ -76,11 +81,23 @@ public class GameEngine implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         // dla wartości [-2,2] nie reagujemy, by telefon nie był taki czuły na przechylenia
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            if (event.values[0] > 2) {
-                player.setVelocity(-15);
-            } else if (event.values[0] < -2) {
-                player.setVelocity(15);
+        if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
+            accelOutput = event.values;
+        }
+        else if(event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
+            magOutput = event.values;
+        }
+        if(accelOutput != null && magOutput != null){
+            float[] R = new float[9];
+            float[] I = new float[9];
+            boolean success = SensorManager.getRotationMatrix(R, I, accelOutput, magOutput);
+            if(success){
+                SensorManager.getOrientation(R, orientation);
+                if(startOrientation == null){
+                    startOrientation = new float[orientation.length];
+                    System.arraycopy(orientation, 0, startOrientation, 0, orientation.length);
+                }
+                player.setHorizontalVelocity((float) (orientation[2] - startOrientation[2])*10);
             }
         }
     }
