@@ -34,7 +34,7 @@ public class Player implements IGameObject {
         }
     }
     private final MyVector vel = new MyVector();
-    private final MyVector acc = new MyVector(0.0f, 0.3f);
+    private final MyVector acc = new MyVector(0.0f, GameState.PLAYER_GRAVITY_VELOCITY);
     private final MyVector pos;
 
     public Player(Bitmap image, int square_size){
@@ -56,7 +56,7 @@ public class Player implements IGameObject {
             deltaTime /= n;
         }
         /**
-         * Na potrzeby detekcji, jeśli gracz spada to jest "próbkowe" sprawdzanie kolizji, jeśli spada szybko,
+         * Na potrzeby detekcji, jeśli gracz spada to jest "próbkowe" sprawdzanie kolizji - jeśli spada szybko,
          * dzięki temu mniejsza szansa na ominięcie sprawdzania kolizji z platformą (która ma wąską kolizję)
          */
         for (int k =0; k< n; k++) {
@@ -111,7 +111,7 @@ public class Player implements IGameObject {
 
     public void jump(){
         if(!canJump) return;
-        this.vel.y = -20.0f;
+        this.vel.y = -GameState.PLAYER_JUMP_VELOCITY;
         canJump = false;
     }
 

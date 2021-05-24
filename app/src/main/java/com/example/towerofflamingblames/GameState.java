@@ -10,8 +10,12 @@ public class GameState {
 
     public static int SCREEN_WIDTH;
     public static int SCREEN_HEIGHT;
+    ///// PLAYERS
     public final static int PLAYER_HEIGHT_PERCENTAGE = 10;
+    public static float PLAYER_JUMP_VELOCITY = 20.0f;
+    public final static float PLAYER_GRAVITY_VELOCITY = 0.3f;
 
+    ////
     public static LinkedList<IGameObject> platforms = new LinkedList<>();
     // wielkość pojedynczej kostki platformy
     public static int PLATFORM_SIZE = 100;
