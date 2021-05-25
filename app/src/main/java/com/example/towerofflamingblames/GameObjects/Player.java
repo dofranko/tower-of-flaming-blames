@@ -51,8 +51,9 @@ public class Player implements IGameObject {
     @Override
     public void update(float deltaTime) {
         int n = 1;
+        boolean doExit = false; //gdy gracz już ma kolizję z podłożem to koniec "próbkowania"
         if(this.vel.y >= 0) {
-            n = (Math.abs((int) ((this.vel.y + 0.5f * this.acc.y) * deltaTime))) / (GameState.PLATFORM_SIZE / 4) + 1;
+            n = (Math.abs((int) ((this.vel.y + this.acc.y * deltaTime + 0.5f * this.acc.y) * deltaTime))) / (GameState.PLATFORM_SIZE / 4) + 1;
             deltaTime /= n;
         }
         /**
@@ -85,6 +86,7 @@ public class Player implements IGameObject {
                             this.pos.y = object.getRect().top - getRect().height();
                             this.vel.y = 0;
                             canJump = true;
+                            doExit = true;
                         }
                     }
                 }
@@ -97,6 +99,7 @@ public class Player implements IGameObject {
                     GameState.artefacts.remove(i);
                 }
             }
+            if(doExit) break;
         }
 
     }
