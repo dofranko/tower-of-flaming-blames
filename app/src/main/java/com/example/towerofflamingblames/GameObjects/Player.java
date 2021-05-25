@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.util.Log;
 
 import com.example.towerofflamingblames.GameState;
 import com.example.towerofflamingblames.GameSurface;
@@ -33,7 +34,7 @@ public class Player implements IGameObject {
         }
     }
     private final MyVector vel = new MyVector();
-    private final MyVector acc = new MyVector(0.0f, 0.8f);
+    private final MyVector acc = new MyVector(0.0f, GameState.PLAYER_GRAVITY_VELOCITY);
     private final MyVector pos;
 
     public Player(Bitmap image, int square_size){
@@ -48,47 +49,69 @@ public class Player implements IGameObject {
     }
 
     @Override
-    public void update() {
-        this.vel.y += this.acc.y;
-
-        this.pos.y += (int) (this.vel.y + 0.5f * this.acc.y);
-
-        this.vel.x *= 0.9;
-        if (this.pos.x + this.vel.x >= 0 && this.getRect().right + this.vel.x <= GameState.SCREEN_WIDTH) {
-            this.pos.x += (this.vel.x);
+    public void update(float deltaTime) {
+        int n = 1;
+        if(this.vel.y >= 0) {
+            n = (Math.abs((int) ((this.vel.y + 0.5f * this.acc.y) * deltaTime))) / (GameState.PLATFORM_SIZE / 4) + 1;
+            deltaTime /= n;
         }
+        /**
+         * Na potrzeby detekcji, jeśli gracz spada to jest "próbkowe" sprawdzanie kolizji - jeśli spada szybko,
+         * dzięki temu mniejsza szansa na ominięcie sprawdzania kolizji z platformą (która ma wąską kolizję)
+         */
+        for (int k =0; k< n; k++) {
+            this.vel.y += this.acc.y * deltaTime;
+            int tmppos = (int) this.pos.y;
+            this.pos.y += (int) ((this.vel.y + 0.5f * this.acc.y) * deltaTime);
+            Log.d("difff", String.valueOf(tmppos - this.pos.y));
+            this.vel.x *= 0.9;
+            if (this.pos.x + this.vel.x * deltaTime >= 0
+                    && this.getRect().right + this.vel.x * deltaTime <= GameState.SCREEN_WIDTH) {
+                this.pos.x += (this.vel.x) * deltaTime;
+            }
 
-        if (Math.abs(this.vel.x) < 0.001f) {
-            this.vel.x = 0.0f;
-        }
+            if (Math.abs(this.vel.x) < 0.001f) {
+                this.vel.x = 0.0f;
+            }
 
-        this.rect.set((int) this.pos.x, (int) this.pos.y, (int) this.pos.x + this.rect.width(),
-                (int) this.pos.y + this.rect.height());
+            this.rect.set((int) this.pos.x, (int) this.pos.y, (int) this.pos.x + this.rect.width(),
+                    (int) this.pos.y + this.rect.height());
 
-        // iterowanie po platformach w celu sprawdzenia kolizji
-        for (IGameObject object : GameState.platforms) {
-            if (Rect.intersects(this.rect, object.getRect())) {
-                if (this.getRect().bottom < object.getRect().top + GameState.PLATFORM_SIZE / 4 &&
-                        this.vel.y > 0) {
-                    this.pos.y = object.getRect().top - getRect().height();
-                    this.vel.y = 0;
-                    canJump = true;
+            // iterowanie po platformach w celu sprawdzenia kolizji
+            if (this.vel.y >= 0) {
+                for (IGameObject object : GameState.platforms) {
+                    if (Rect.intersects(this.rect, object.getRect())) {
+                        if (this.getRect().bottom < object.getRect().top + GameState.PLATFORM_SIZE / 4) {
+                            this.pos.y = object.getRect().top - getRect().height();
+                            this.vel.y = 0;
+                            canJump = true;
+                        }
+                    }
+                }
+            }
+
+            // iterowanie po artefaktach w celu sprawdzenia kolizji
+            for (int i = 0; i < GameState.artefacts.size(); i++) {
+                if (Rect.intersects(this.rect, GameState.artefacts.get(i).getRect())) {
+                    GameState.artefacts.get(i).action(this);
+                    GameState.artefacts.remove(i);
                 }
             }
         }
 
-        // iterowanie po artefaktach w celu sprawdzenia kolizji
-        for (int i = 0; i < GameState.artefacts.size(); i++) {
-            if (Rect.intersects(this.rect, GameState.artefacts.get(i).getRect())) {
-                GameState.artefacts.get(i).action(this);
-                GameState.artefacts.remove(i);
-            }
-        }
+    }
+
+
+    public void updateFallingPosition(float deltaTime){
+        int temp = (int) (GameState.MOVABLE_Y * deltaTime);
+        this.pos.y += temp;
+        this.rect.top += temp;
+        this.rect.bottom += temp;
     }
 
     public void jump(){
         if(!canJump) return;
-        this.vel.y = -20.0f;
+        this.vel.y = -GameState.PLAYER_JUMP_VELOCITY;
         canJump = false;
     }
 
@@ -107,7 +130,7 @@ public class Player implements IGameObject {
         return this.coins;
     }
 
-    public void setVelocity(float x){
+    public void setHorizontalVelocity(float x){
         this.vel.x = x;
     }
 

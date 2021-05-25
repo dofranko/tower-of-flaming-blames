@@ -27,7 +27,7 @@ public class Background implements  IGameObject{
     }
 
     @Override
-    public void update() {}
+    public void update(float deltaTime) {}
 
     @Override
     public Rect getRect() {

@@ -83,7 +83,7 @@ public class Generator {
         }
     }
 
-    public void update() {
+    public void update(float deltaTime) {
         // pierwsza dodana do listy platforma
         IGameObject lowestPlatform = GameState.platforms.getFirst();
         if (lowestPlatform != null) {
@@ -103,10 +103,10 @@ public class Generator {
             }
         }
         for (IGameObject gameObject : GameState.platforms) {
-            gameObject.update();
+            gameObject.update(deltaTime);
         }
         for (IGameObject gameObject : GameState.artefacts) {
-            gameObject.update();
+            gameObject.update(deltaTime);
         }
     }
 
