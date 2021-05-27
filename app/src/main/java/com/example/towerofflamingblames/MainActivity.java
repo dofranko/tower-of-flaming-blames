@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 
 import com.example.towerofflamingblames.GameStatistics.StatisticsTypeActivity;
 import com.firebase.ui.auth.AuthUI;
@@ -28,13 +29,12 @@ public class MainActivity extends AppCompatActivity {
     // dostępne metody logowania (mail)
     private final List<AuthUI.IdpConfig> providers = Collections.singletonList(new AuthUI.IdpConfig.EmailBuilder().build());
     // aktualny zalogowany user
-    private FirebaseUser user;
+    private FirebaseUser user = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        createLogin();
     }
 
     // tworzenie okna logowania
@@ -59,12 +59,15 @@ public class MainActivity extends AppCompatActivity {
                     DatabaseReference myRef = database.getReference().child("Users").child(this.user.getUid());
                     myRef.child("Name").setValue(this.user.getDisplayName());
                     myRef.child("Email").setValue(this.user.getEmail());
+                    // zmiana interfesju gry
+                    Button btnAccount = findViewById(R.id.button4);
+                    Button btnStatistics = findViewById(R.id.button);
+                    btnAccount.setText("LOGOUT");
+                    btnStatistics.setVisibility(View.VISIBLE);
                 }
-            } else {
-                createLogin();
             }
         } else if (requestCode == RC_GAME) {
-            if (resultCode == RESULT_OK) {
+            if (resultCode == RESULT_OK && this.user != null) {
                 // odebranie liczby monet po skończonej grze
                 String coins = data.getStringExtra("coins");
                 DatabaseReference myRef = database.getReference().child("Users").child(this.user.getUid());
@@ -111,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
                                     myRef.child("Highest").child("Date").setValue(currentDate);
                                 }
                             });
-
                         }
                     }
                 });
@@ -132,13 +134,32 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, RC_GAME);
     }
 
+    // zarządzanie kontem (logowanie, wylogowanie)
+    public void manageAccount(View view) {
+        if (this.user == null) {
+            createLogin();
+        } else {
+            Button btn = (Button) view;
+            Button btnStatistics = findViewById(R.id.button);
+            AuthUI.getInstance()
+                    .signOut(this)
+                    .addOnCompleteListener(task -> {
+                    });
+            this.user = null;
+            btn.setText("LOGIN");
+            btnStatistics.setVisibility(View.GONE);
+        }
+    }
+
     // wylogowuje danego użytkownika
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        AuthUI.getInstance()
-                .signOut(this)
-                .addOnCompleteListener(task -> {
-                });
+        if (this.user != null) {
+            AuthUI.getInstance()
+                    .signOut(this)
+                    .addOnCompleteListener(task -> {
+                    });
+        }
     }
 }
