@@ -29,8 +29,9 @@ public class GameEngine implements SensorEventListener {
 
     public GameEngine(GameSurface context, GameActivity activity) {
         this.activity = activity;
-        GameState.SCREEN_WIDTH = Resources.getSystem().getDisplayMetrics().widthPixels;
-        GameState.SCREEN_HEIGHT = Resources.getSystem().getDisplayMetrics().heightPixels;
+        GameState.restart(Resources.getSystem().getDisplayMetrics().widthPixels,
+                Resources.getSystem().getDisplayMetrics().heightPixels);
+
         background = new Background(BitmapFactory.decodeResource(context.getResources(),
                 R.drawable.background_flames));
         this.generator = new Generator(context);

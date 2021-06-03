@@ -23,12 +23,17 @@ public class Generator implements IGameObject {
     public Generator(GameSurface context) {
         this.context = context;
         this.imageCoin = BitmapFactory.decodeResource(context.getResources(), R.drawable.coin0);
-        GameState.PLATFORM_GAP_Y = (int)(GameState.SCREEN_HEIGHT / GameState.PLAYER_HEIGHT_PERCENTAGE * 1.8);
+
     }
 
     public void createObjects() {
+        int tmp_top = GameState.SCREEN_HEIGHT/2 + GameState.PLATFORM_GAP_Y;
+        while (tmp_top < GameState.SCREEN_HEIGHT) {
+            GameState.platforms.addFirst(new Platform(GameState.SCREEN_WIDTH/2, tmp_top, 1, false, context));
+            tmp_top += GameState.PLATFORM_GAP_Y;
+        }
         // podłoga wieży
-        GameState.platforms.add(new Platform(-50, GameState.SCREEN_HEIGHT - 100, 10, false, context));
+        GameState.platforms.add(new Platform(-50, GameState.SCREEN_HEIGHT /2, 10, false, context));
         // dodanie pierwszego schodka
         int left = GameState.SCREEN_WIDTH / 2 - GameState.PLATFORM_SIZE * 2;
         int top = GameState.platforms.getLast().getRect().top - GameState.PLATFORM_GAP_Y;
@@ -49,7 +54,8 @@ public class Generator implements IGameObject {
             movable = true;
         }
         // losujemy długość platformy z dozwolonego zakresu
-        int number = (int)(Math.random() * GameState.MAX_PLATFORM_LENGTH);
+        int number = (int)(GameState.MIN_PLATFORM_LENGTH
+                +  Math.random() * (GameState.MAX_PLATFORM_LENGTH - GameState.MIN_PLATFORM_LENGTH));
         int left = GameState.platforms.getLast().getRect().left;
         // jeśli będzie poza ekranem zmieniamy stronę przesuwania platform
         // prawa ściana

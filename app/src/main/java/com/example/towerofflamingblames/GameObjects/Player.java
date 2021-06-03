@@ -1,7 +1,6 @@
 package com.example.towerofflamingblames.GameObjects;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -9,10 +8,6 @@ import android.graphics.Rect;
 import android.util.Log;
 
 import com.example.towerofflamingblames.GameState;
-import com.example.towerofflamingblames.GameSurface;
-import com.example.towerofflamingblames.R;
-
-import java.util.ArrayList;
 
 public class Player implements IGameObject {
 
@@ -40,7 +35,7 @@ public class Player implements IGameObject {
     public Player(Bitmap image, int square_size){
         this.image = image;
         this.pos = new MyVector((int) (GameState.SCREEN_WIDTH / 2),
-                (int) (GameState.SCREEN_HEIGHT - GameState.PLATFORM_GAP_Y * 2));
+                (int) (GameState.SCREEN_HEIGHT /2 - 100 - square_size));
         this.rect = new Rect((int)pos.x,(int)pos.y,
                 (int)pos.x+square_size,(int)pos.y+square_size);
         this.paint = new Paint();
@@ -106,7 +101,7 @@ public class Player implements IGameObject {
 
 
     public void updateFallingPosition(float deltaTime){
-        int temp = (int) (GameState.MOVABLE_Y * deltaTime);
+        int temp = (int) (GameState.PLATFORM_MOVABLE_SPEED_Y * deltaTime);
         this.pos.y += temp;
         this.rect.top += temp;
         this.rect.bottom += temp;
