@@ -125,6 +125,13 @@ public class Player implements IGameObject {
     }
 
     @Override
+    public void moveScene(int deltaY) {
+        rect.top += deltaY;
+        rect.bottom += deltaY;
+        pos.y += deltaY;
+    }
+
+    @Override
     public Rect getRect() {
         return this.rect;
     }

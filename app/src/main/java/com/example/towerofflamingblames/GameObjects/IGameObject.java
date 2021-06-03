@@ -6,5 +6,6 @@ import android.graphics.Rect;
 public interface IGameObject {
     void update(float deltaTime);
     void draw(Canvas canvas);
+    void moveScene(int deltaY);
     Rect getRect();
 }

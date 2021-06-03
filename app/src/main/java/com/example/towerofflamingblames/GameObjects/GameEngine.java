@@ -50,9 +50,25 @@ public class GameEngine implements SensorEventListener {
         background.update(deltaTime);
         generator.update(deltaTime);
         player.updateFallingPosition(deltaTime);
+        this.moveScene(deltaTime);
         if (player.getRect().bottom >= GameState.SCREEN_HEIGHT) {
             int coins = this.player.getCoins();
             this.activity.endGame(coins);
+        }
+    }
+
+    /**
+     * Poruszenie "oknem" - jeśli gracz jest powyżej połowy ekranu - by "przyspieszyć" rozgrywkę
+     * @param deltaTime
+     */
+    private void moveScene(float deltaTime){
+        int deltaY = player.getRect().top + player.getRect().height()/2 - GameState.SCREEN_HEIGHT/2;
+        if(deltaY < 0) {
+            deltaY = (int) (-deltaY * GameState.MOVE_SCENE_SLOW_RATIO * 3.3f / deltaTime);
+
+            player.moveScene(deltaY);
+            background.moveScene(deltaY);
+            generator.moveScene(deltaY);
         }
     }
 

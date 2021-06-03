@@ -71,6 +71,12 @@ public class Platform implements IGameObject {
     }
 
     @Override
+    public void moveScene(int deltaY) {
+        rect.top += deltaY;
+        rect.bottom += deltaY;
+    }
+
+    @Override
     public Rect getRect() {
         return this.rect;
     }

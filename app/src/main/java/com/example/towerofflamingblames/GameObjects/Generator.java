@@ -9,7 +9,7 @@ import com.example.towerofflamingblames.GameState;
 import com.example.towerofflamingblames.GameSurface;
 import com.example.towerofflamingblames.R;
 
-public class Generator {
+public class Generator implements IGameObject {
 
     private final GameSurface context;
     private final Bitmap imageCoin;
@@ -108,6 +108,20 @@ public class Generator {
         for (IGameObject gameObject : GameState.artefacts) {
             gameObject.update(deltaTime);
         }
+    }
+
+    public void moveScene(int deltaY){
+        for (IGameObject gameObject : GameState.platforms) {
+            gameObject.moveScene(deltaY);
+        }
+        for (IGameObject gameObject : GameState.artefacts) {
+            gameObject.moveScene(deltaY);
+        }
+    }
+
+    @Override
+    public Rect getRect() {
+        return null;
     }
 
     public void draw(Canvas canvas) {

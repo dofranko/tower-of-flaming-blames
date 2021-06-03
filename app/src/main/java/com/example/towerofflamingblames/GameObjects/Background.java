@@ -27,6 +27,11 @@ public class Background implements  IGameObject{
     }
 
     @Override
+    public void moveScene(int deltaY) {
+
+    }
+
+    @Override
     public void update(float deltaTime) {}
 
     @Override
