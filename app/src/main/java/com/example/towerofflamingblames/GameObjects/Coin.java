@@ -30,7 +30,7 @@ public class Coin implements IGameArtefact {
     @Override
     public void update(float deltaTime) {
         // stopniowe opuszczanie monet
-        int temp = (int) (GameState.MOVABLE_Y * deltaTime);
+        int temp = (int) (GameState.PLATFORM_MOVABLE_SPEED_Y * deltaTime);
         rect.top += temp;
         rect.bottom += temp;
         // co trzy wywołania funkcji zmieniaj zdjęcie (TODO można dodać do tego delta time)
@@ -58,6 +58,8 @@ public class Coin implements IGameArtefact {
     @Override
     public void action(Player player) {
         player.addCoin();
+        GameState.increaseDifficulty();
+
     }
 
     @Override

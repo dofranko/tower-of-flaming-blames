@@ -39,7 +39,7 @@ public class Platform implements IGameObject {
     @Override
     public void update(float deltaTime) {
         if (movable) {
-            int temp = (int) (GameState.MOVABLE_X * deltaTime * direction * speedMultiplier);;
+            int temp = (int) (GameState.PLATFORM_MOVABLE_SPEED_X * deltaTime * direction * speedMultiplier);;
             rect.left += temp;
             rect.right += temp;
             // platforma porusza się na całej długości ekranu
@@ -48,7 +48,7 @@ public class Platform implements IGameObject {
             }
         }
         // stopniowe opuszczanie platformy
-        int temp = (int) (GameState.MOVABLE_Y * deltaTime);
+        int temp = (int) (GameState.PLATFORM_MOVABLE_SPEED_Y * deltaTime);
         rect.top += temp;
         rect.bottom += temp;
     }
