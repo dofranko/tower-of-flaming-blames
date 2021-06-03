@@ -36,4 +36,7 @@ public class GameState {
     public static ArrayList<IGameArtefact> artefacts = new ArrayList<>();
     // częstotliwość występowania monet
     public static int COINS_FREQUENCY = 5;
+
+    // spowolnienie poruszania się "okna",gdy gracz jest powyżej połowy ekranu
+    public static float MOVE_SCENE_SLOW_RATIO = 0.03f;
 }

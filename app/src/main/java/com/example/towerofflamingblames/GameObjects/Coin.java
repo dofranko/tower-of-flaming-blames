@@ -50,6 +50,12 @@ public class Coin implements IGameArtefact {
     }
 
     @Override
+    public void moveScene(int deltaY) {
+        rect.top += deltaY;
+        rect.bottom += deltaY;
+    }
+
+    @Override
     public void action(Player player) {
         player.addCoin();
     }
