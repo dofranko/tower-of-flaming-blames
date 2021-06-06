@@ -3,6 +3,7 @@ package com.example.towerofflamingblames;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.hardware.SensorManager;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -11,6 +12,8 @@ import androidx.annotation.NonNull;
 
 import com.example.towerofflamingblames.GameObjects.GameEngine;
 import com.example.towerofflamingblames.GameObjects.IGameObject;
+
+import static android.content.Context.SENSOR_SERVICE;
 
 public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
 
@@ -51,6 +54,8 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
             retry = false;
             GameState.platforms.clear();
             GameState.artefacts.clear();
+            SensorManager senman =(SensorManager) this.getContext().getSystemService(SENSOR_SERVICE);
+            senman.unregisterListener(gameEngine);
         }
     }
 
