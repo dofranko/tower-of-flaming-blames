@@ -1,6 +1,8 @@
 package com.example.towerofflamingblames;
 
-import com.example.towerofflamingblames.GameObjects.IGameArtefact;
+import android.graphics.Bitmap;
+
+import com.example.towerofflamingblames.GameObjects.Artefacts.IGameArtefact;
 import com.example.towerofflamingblames.GameObjects.IGameObject;
 
 import java.util.ArrayList;
@@ -132,9 +134,14 @@ public class GameState {
     public static int PLATFORM_GAP_Y; //sbr
 
     // rozmiar różnych artefaktów w grze
-    public final static int ARTEFACT_SIZE = 80;
+    public final static int ARTEFACT_SIZE = 100;
     // lista artefaktów
     public static ArrayList<IGameArtefact> artefacts; //sbr
+    // bitmapy artefaktów
+    public static ArrayList<Bitmap> bitmapsCoin;
+    public static ArrayList<Bitmap> bitmapsCoins;
+    public static ArrayList<Bitmap> bitmapsHourglass;
+    public static ArrayList<Bitmap> bitmapsHurricane;
     // częstotliwość występowania monet
     public static int COINS_FREQUENCY; //sbr
 

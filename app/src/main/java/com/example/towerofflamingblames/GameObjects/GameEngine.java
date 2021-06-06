@@ -35,8 +35,7 @@ public class GameEngine implements SensorEventListener {
         background = new Background(BitmapFactory.decodeResource(context.getResources(),
                 R.drawable.background_flames));
         this.generator = new Generator(context);
-        this.player = new Player(BitmapFactory.decodeResource(context.getResources(),
-                R.drawable.player_temp), GameState.SCREEN_HEIGHT * GameState.PLAYER_HEIGHT_PERCENTAGE / 100);
+        this.player = new Player(context.getContext(), GameState.SCREEN_HEIGHT * GameState.PLAYER_HEIGHT_PERCENTAGE / 100);
         generator.createObjects();
         // tworzenie reagowania na przechylenia telefonu
         SensorManager sensorManager = (SensorManager) context.getContext().getSystemService(SENSOR_SERVICE);
