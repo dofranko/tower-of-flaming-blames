@@ -141,4 +141,11 @@ public class GameState {
     // spowolnienie poruszania się "okna",gdy gracz jest powyżej połowy ekranu
     public final static float MOVE_SCENE_SLOW_RATIO = 0.03f;
 
+    /*
+    ==========
+    CONTROLS
+    ==========
+     */
+    //minimalna czułość sterowania przechylając ekran
+    public final static float MIN_TILT_DEVICE_TO_MOVE = 0.3f;
 }

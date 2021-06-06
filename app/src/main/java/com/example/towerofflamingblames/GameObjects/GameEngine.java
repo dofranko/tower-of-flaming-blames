@@ -22,16 +22,14 @@ public class GameEngine implements SensorEventListener {
     private final Player player;
     private final Generator generator;
     private final GameActivity activity;
-    private float[] accelOutput;
-    private float[] magOutput;
-    private float[] orientation = new float[3];
-    private float[] startOrientation = null;
+    private final SensorManager sensorManager;
+    private final GameSurface context;
 
     public GameEngine(GameSurface context, GameActivity activity) {
         this.activity = activity;
         GameState.restart(Resources.getSystem().getDisplayMetrics().widthPixels,
                 Resources.getSystem().getDisplayMetrics().heightPixels);
-
+        this.context = context;
         background = new Background(BitmapFactory.decodeResource(context.getResources(),
                 R.drawable.background_flames));
         this.generator = new Generator(context);
@@ -39,11 +37,8 @@ public class GameEngine implements SensorEventListener {
                 R.drawable.player_temp), GameState.SCREEN_HEIGHT * GameState.PLAYER_HEIGHT_PERCENTAGE / 100);
         generator.createObjects();
         // tworzenie reagowania na przechylenia telefonu
-        SensorManager sensorManager = (SensorManager) context.getContext().getSystemService(SENSOR_SERVICE);
-        Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        Sensor magnometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
-        sensorManager.registerListener(this, magnometer, SensorManager.SENSOR_DELAY_GAME);
+        sensorManager = (SensorManager) context.getContext().getSystemService(SENSOR_SERVICE);
+        registerSensors();
     }
 
     public void update(float deltaTime) {
@@ -97,10 +92,11 @@ public class GameEngine implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        // dla wartości [-2,2] nie reagujemy, by telefon nie był taki czuły na przechylenia
         if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
-            accelOutput = event.values;
+            if(Math.abs(event.values[0]) < GameState.MIN_TILT_DEVICE_TO_MOVE) return;
+            player.setHorizontalVelocity(event.values[0] * -2);
         }
+        /*
         else if(event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
             magOutput = event.values;
         }
@@ -116,9 +112,24 @@ public class GameEngine implements SensorEventListener {
                 }
                 player.setHorizontalVelocity((float) (orientation[2] - startOrientation[2])*10);
             }
-        }
+        }*/
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+
+    private void registerSensors(){
+        Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
+    }
+
+    private void deregisterSensors(){
+        sensorManager.unregisterListener(this);
+    }
+
+    public void endGame(){
+        deregisterSensors();
+    }
+
+    public void pauseGame(){deregisterSensors();}
 }

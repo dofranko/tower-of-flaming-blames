@@ -7,6 +7,7 @@
     android:layout_height="wrap_content">
 
     <TableRow
+        android:layout_margin="5dp"
         android:id="@+id/tableRow"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -32,8 +33,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="4"
-                    android:textColor="#F60303"
-                    android:textStyle="bold" />
+                    android:fontFamily="serif"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    android:textStyle="italic"
+                    tools:text="a" />
 
                 <TextView
                     android:id="@+id/score"
@@ -41,9 +45,12 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="10dp"
                     android:layout_weight="2"
+                    android:fontFamily="serif"
                     android:gravity="right"
-                    android:textColor="#F80303"
-                    tools:ignore="RtlHardcoded" />
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    tools:ignore="RtlHardcoded"
+                    tools:text="23" />
             </TableRow>
 
             <TableRow
@@ -57,7 +64,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="4"
-                    android:textColor="#F40202" />
+                    android:fontFamily="serif"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    tools:text="a" />
 
                 <TextView
                     android:id="@+id/date"
@@ -65,9 +76,13 @@
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
                     android:layout_weight="2"
+                    android:fontFamily="sans-serif"
                     android:gravity="right"
-                    android:textColor="#FA0202"
-                    tools:ignore="RtlHardcoded" />
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:textStyle="italic"
+                    tools:ignore="RtlHardcoded"
+                    tools:text="2020-12" />
             </TableRow>
 
         </TableLayout>
