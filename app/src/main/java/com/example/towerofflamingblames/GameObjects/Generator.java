@@ -4,21 +4,38 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.gifdecoder.StandardGifDecoder;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
+import com.example.towerofflamingblames.GameObjects.Artefacts.Coin;
+import com.example.towerofflamingblames.GameObjects.Artefacts.Coins;
+import com.example.towerofflamingblames.GameObjects.Artefacts.Hourglass;
+import com.example.towerofflamingblames.GameObjects.Artefacts.Hurricane;
 import com.example.towerofflamingblames.GameState;
 import com.example.towerofflamingblames.GameSurface;
 import com.example.towerofflamingblames.R;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Objects;
+
 public class Generator implements IGameObject {
 
-    private final GameSurface context;
+    public final GameSurface context;
     private final Bitmap imageCoin;
     private final Rect rectCoin = new Rect(10, 10, 100 ,100);
     // odlicza, kiedy umieścić ruchomą platformę
     private int counterPlatforms = 0;
-    // odlicza, kiedy umieścić monetę
+    // odlicza, kiedy umieścić monety
     private int counterCoins = 0;
-
 
     public Generator(GameSurface context) {
         this.context = context;
@@ -27,6 +44,8 @@ public class Generator implements IGameObject {
     }
 
     public void createObjects() {
+        // na samym początku wygenerowanie bitmap
+        createBitmaps();
         int tmp_top = GameState.SCREEN_HEIGHT/2 + GameState.PLATFORM_GAP_Y;
         while (tmp_top < GameState.SCREEN_HEIGHT) {
             GameState.platforms.addFirst(new Platform(GameState.SCREEN_WIDTH/2, tmp_top, 1, false, context));
@@ -71,22 +90,37 @@ public class Generator implements IGameObject {
         // obliczanie wysokości następnej platformy
         int top = GameState.platforms.getLast().getRect().top - GameState.PLATFORM_GAP_Y;
         GameState.platforms.add(new Platform(left, top, number, movable, context));
-        // co ileś na platformie będzie znajdować się moneta
+        // co ileś na platformie będzie znajdować się:
         addCoin();
+        if (GameState.COINS_FREQUENCY / 2 == counterCoins) {
+            int i = (int) (Math.random() * 9);
+            int[] positions = getPositionOfArtefact();
+            if (i == 0)
+                GameState.artefacts.add(new Coins(positions[0], positions[1]));
+            else if (i == 4)
+                GameState.artefacts.add(new Hourglass(positions[0], positions[1]));
+            else if (i == 8)
+                GameState.artefacts.add(new Hurricane(positions[0], positions[1]));
+        }
     }
 
     // dodawanie monet na platformach
     private void addCoin() {
         counterCoins += 1;
-        if (counterCoins == GameState.COINS_FREQUENCY) {
+        if (counterCoins >= GameState.COINS_FREQUENCY) {
             counterCoins = 0;
-            int left = GameState.platforms.getLast().getRect().left;
-            int right = GameState.platforms.getLast().getRect().right;
-            int coinLeft = right - left - GameState.ARTEFACT_SIZE / 2;
-            int top = GameState.platforms.getLast().getRect().top;
-            int coinTop = top - GameState.ARTEFACT_SIZE - 20;
-            GameState.artefacts.add(new Coin(coinLeft, coinTop, context));
+            int[] positions = getPositionOfArtefact();
+            GameState.artefacts.add(new Coin(positions[0], positions[1]));
         }
+    }
+
+    private int[] getPositionOfArtefact() {
+        int left = GameState.platforms.getLast().getRect().left;
+        int right = GameState.platforms.getLast().getRect().right;
+        int artefactLeft = (right - left) / 2 + left - GameState.ARTEFACT_SIZE / 2;
+        int top = GameState.platforms.getLast().getRect().top;
+        int artefactTop = top - GameState.ARTEFACT_SIZE;
+        return new int[]{artefactLeft, artefactTop};
     }
 
     public void update(float deltaTime) {
@@ -139,5 +173,45 @@ public class Generator implements IGameObject {
         }
         // rysuje ikonkę monety przy obecnej liczbie monet gracza
         canvas.drawBitmap(imageCoin, null, rectCoin, null);
+    }
+
+    // jednorazowe stworzenie bitmap
+    public void createBitmaps() {
+        GameState.bitmapsCoin = generateBitmapsFromGIF(R.drawable.coin);
+        GameState.bitmapsCoins = generateBitmapsFromGIF(R.drawable.coins);
+        GameState.bitmapsHourglass = generateBitmapsFromGIF(R.drawable.hourglass);
+        GameState.bitmapsHurricane = generateBitmapsFromGIF(R.drawable.hurricane);
+    }
+
+    // metoda służąca do przkonwertowania GIFa na serię bitmap z użyciem biblioteki Glide
+    private ArrayList<Bitmap> generateBitmapsFromGIF(int gif) {
+        ArrayList<Bitmap> bitmaps = new ArrayList();
+        Glide.with(context.getContext())
+                .asGif()
+                .load(gif)
+                .into(new CustomTarget<GifDrawable>() {
+                    @Override
+                    public void onResourceReady(@NonNull GifDrawable resource, @Nullable Transition<? super GifDrawable> transition) {
+                        try {
+                            Object GifState = resource.getConstantState();
+                            Field frameLoader = GifState.getClass().getDeclaredField("frameLoader");
+                            frameLoader.setAccessible(true);
+                            Object gifFrameLoader = frameLoader.get(GifState);
+                            assert gifFrameLoader != null;
+                            Field gifDecoder = gifFrameLoader.getClass().getDeclaredField("gifDecoder");
+                            gifDecoder.setAccessible(true);
+                            StandardGifDecoder standardGifDecoder = (StandardGifDecoder) gifDecoder.get(gifFrameLoader);
+                            for (int i = 0; i < Objects.requireNonNull(standardGifDecoder).getFrameCount(); i++) {
+                                standardGifDecoder.advance();
+                                bitmaps.add(standardGifDecoder.getNextFrame());
+                            }
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                    @Override
+                    public void onLoadCleared(@Nullable @org.jetbrains.annotations.Nullable Drawable placeholder) { }
+                });
+        return bitmaps;
     }
 }
