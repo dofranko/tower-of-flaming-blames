@@ -13,6 +13,8 @@ import android.util.Log;
 import com.example.towerofflamingblames.GameState;
 import com.example.towerofflamingblames.R;
 
+import java.util.ArrayList;
+
 public class Player implements IGameObject {
 
     private final Rect rect;
@@ -31,6 +33,7 @@ public class Player implements IGameObject {
     private float durationCoins = 0;
     private float durationHourglass = 0;
     private float durationHurricane = 0;
+    private final ArrayList<Bitmap> activeBoosters = new ArrayList<>();
     private static class MyVector{
         public float x;
         public float y;
@@ -140,6 +143,7 @@ public class Player implements IGameObject {
                 isBoosterCoinsActive = false;
                 GameState.COINS_FREQUENCY += this.diffCoinsFrequency;
                 durationCoins = 0;
+                activeBoosters.remove(GameState.bitmapsCoins.get(30));
             }
         }
         if (isBoosterHourglassActive) {
@@ -148,6 +152,7 @@ public class Player implements IGameObject {
                 isBoosterHourglassActive = false;
                 GameState.PLATFORM_MOVABLE_SPEED_Y += this.diffPlatformSpeedY;
                 durationHourglass = 0;
+                activeBoosters.remove(GameState.bitmapsHourglass.get(0));
             }
         }
         if (isBoosterHurricaneActive) {
@@ -156,6 +161,7 @@ public class Player implements IGameObject {
                 isBoosterHurricaneActive = false;
                 GameState.PLAYER_JUMP_VELOCITY -= this.diffJumpVelocity;
                 durationHurricane = 0;
+                activeBoosters.remove(GameState.bitmapsHurricane.get(0));
             }
         }
     }
@@ -188,11 +194,24 @@ public class Player implements IGameObject {
         }
         if (isBoosterHourglassActive && durationHourglass < 100) {
             paintBooster.setAlpha(500 - (int) (durationHourglass) * 2);
-            canvas.drawText("More time!", (int) (GameState.SCREEN_WIDTH / 10 * 3), GameState.SCREEN_HEIGHT - 200, paintBooster);
+            int y = GameState.SCREEN_HEIGHT - 200;
+            if (durationCoins < 100)
+                y -= 100;
+            canvas.drawText("More time!", (int) (GameState.SCREEN_WIDTH / 10 * 3), y, paintBooster);
         }
         if (isBoosterHurricaneActive && durationHurricane < 100) {
             paintBooster.setAlpha(500 - (int) (durationHurricane) * 2);
-            canvas.drawText("Higher jumps!", (int) (GameState.SCREEN_WIDTH / 10 * 2), GameState.SCREEN_HEIGHT - 200, paintBooster);
+            int y = GameState.SCREEN_HEIGHT - 200;
+            if (durationCoins < 100)
+                y -= 100;
+            if (durationHourglass < 100)
+                y -= 100;
+            canvas.drawText("Higher jumps!", (int) (GameState.SCREEN_WIDTH / 10 * 2), y, paintBooster);
+        }
+        for (int i = 0; i < activeBoosters.size(); i++) {
+            Rect iconRect = new Rect(GameState.SCREEN_WIDTH - GameState.ARTEFACT_SIZE * (i+1) - 10, 20,
+                    GameState.SCREEN_WIDTH - GameState.ARTEFACT_SIZE * i - 10, 20 + GameState.ARTEFACT_SIZE);
+            canvas.drawBitmap(activeBoosters.get(i), null, iconRect, null);
         }
     }
 
@@ -243,6 +262,7 @@ public class Player implements IGameObject {
                 GameState.COINS_FREQUENCY *= 0.8;
                 this.diffCoinsFrequency = previousCoinsFrequency - GameState.COINS_FREQUENCY;
                 this.isBoosterCoinsActive = true;
+                this.activeBoosters.add(GameState.bitmapsCoins.get(30));
             }
         }
         else if (name.equals("hourglass")) {
@@ -253,6 +273,7 @@ public class Player implements IGameObject {
                 GameState.PLATFORM_MOVABLE_SPEED_Y *= 0.8;
                 this.diffPlatformSpeedY = previousPlatformSpeedY - GameState.PLATFORM_MOVABLE_SPEED_Y;
                 this.isBoosterHourglassActive = true;
+                this.activeBoosters.add(GameState.bitmapsHourglass.get(0));
             }
         }
         else if (name.equals("hurricane")) {
@@ -263,6 +284,7 @@ public class Player implements IGameObject {
                 GameState.PLAYER_JUMP_VELOCITY *= 1.2;
                 this.diffJumpVelocity = GameState.PLAYER_JUMP_VELOCITY - previousJumpVelocity;
                 this.isBoosterHurricaneActive = true;
+                this.activeBoosters.add(GameState.bitmapsHurricane.get(0));
             }
         }
     }
