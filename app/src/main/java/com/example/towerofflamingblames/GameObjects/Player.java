@@ -25,9 +25,9 @@ public class Player implements IGameObject {
     private boolean isBoosterCoinsActive = false;
     private boolean isBoosterHourglassActive = false;
     private boolean isBoosterHurricaneActive = false;
-    private int previousCoinsFrequency;
-    private int previousPlatformSpeedY;
-    private float previousJumpVelocity;
+    private int diffCoinsFrequency;
+    private int diffPlatformSpeedY;
+    private float diffJumpVelocity;
     private float durationCoins = 0;
     private float durationHourglass = 0;
     private float durationHurricane = 0;
@@ -65,7 +65,7 @@ public class Player implements IGameObject {
         this.paintBooster = new Paint();
         paintBooster.setColor(Color.YELLOW);
         paintBooster.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC));
-        paintBooster.setTextSize((int) (GameState.SCREEN_WIDTH / 10));
+        paintBooster.setTextSize(GameState.SCREEN_WIDTH / 10);
     }
 
     @Override
@@ -138,7 +138,7 @@ public class Player implements IGameObject {
             durationCoins += deltaTime;
             if (durationCoins > 1000) {
                 isBoosterCoinsActive = false;
-                GameState.COINS_FREQUENCY = this.previousCoinsFrequency;
+                GameState.COINS_FREQUENCY += this.diffCoinsFrequency;
                 durationCoins = 0;
             }
         }
@@ -146,7 +146,7 @@ public class Player implements IGameObject {
             durationHourglass += deltaTime;
             if (durationHourglass > 500) {
                 isBoosterHourglassActive = false;
-                GameState.PLATFORM_MOVABLE_SPEED_Y = this.previousPlatformSpeedY;
+                GameState.PLATFORM_MOVABLE_SPEED_Y += this.diffPlatformSpeedY;
                 durationHourglass = 0;
             }
         }
@@ -154,7 +154,7 @@ public class Player implements IGameObject {
             durationHurricane += deltaTime;
             if (durationHurricane > 500) {
                 isBoosterHurricaneActive = false;
-                GameState.PLAYER_JUMP_VELOCITY = this.previousJumpVelocity;
+                GameState.PLAYER_JUMP_VELOCITY -= this.diffJumpVelocity;
                 durationHurricane = 0;
             }
         }
@@ -239,8 +239,9 @@ public class Player implements IGameObject {
             if (this.isBoosterCoinsActive)
                 this.durationCoins = 0;
             else {
-                this.previousCoinsFrequency = GameState.COINS_FREQUENCY;
-                GameState.COINS_FREQUENCY *= 1.2;
+                int previousCoinsFrequency = GameState.COINS_FREQUENCY;
+                GameState.COINS_FREQUENCY *= 0.8;
+                this.diffCoinsFrequency = previousCoinsFrequency - GameState.COINS_FREQUENCY;
                 this.isBoosterCoinsActive = true;
             }
         }
@@ -248,8 +249,9 @@ public class Player implements IGameObject {
             if (this.isBoosterHourglassActive)
                 this.durationHourglass = 0;
             else {
-                this.previousPlatformSpeedY = GameState.PLATFORM_MOVABLE_SPEED_Y;
+                int previousPlatformSpeedY = GameState.PLATFORM_MOVABLE_SPEED_Y;
                 GameState.PLATFORM_MOVABLE_SPEED_Y *= 0.8;
+                this.diffPlatformSpeedY = previousPlatformSpeedY - GameState.PLATFORM_MOVABLE_SPEED_Y;
                 this.isBoosterHourglassActive = true;
             }
         }
@@ -257,8 +259,9 @@ public class Player implements IGameObject {
             if (this.isBoosterHurricaneActive) {
                 this.durationHurricane = 0;
             } else {
-                this.previousJumpVelocity = GameState.PLAYER_JUMP_VELOCITY;
+                float previousJumpVelocity = GameState.PLAYER_JUMP_VELOCITY;
                 GameState.PLAYER_JUMP_VELOCITY *= 1.2;
+                this.diffJumpVelocity = GameState.PLAYER_JUMP_VELOCITY - previousJumpVelocity;
                 this.isBoosterHurricaneActive = true;
             }
         }
