@@ -102,9 +102,9 @@ public class MainActivity extends AppCompatActivity {
                             myRef.child("Highest").child("Scores").get().addOnCompleteListener(secondTask -> {
                                 if (secondTask.isSuccessful()) {
                                     int previousCoins = 0;
-                                    if (secondTask.getResult() != null) {
-                                        previousCoins = Objects.requireNonNull(secondTask.getResult().getValue(int.class));
-                                    }
+                                    try {
+                                        previousCoins = secondTask.getResult().getValue(int.class);
+                                    } catch (NullPointerException ignored) { }
                                     if (previousCoins <= currentHighestScores) {
                                         myRef.child("Highest").child("Scores").setValue(currentHighestScores);
                                         myRef.child("Highest").child("Date").setValue(currentDate);
