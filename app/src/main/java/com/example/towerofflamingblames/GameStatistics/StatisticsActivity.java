@@ -76,6 +76,8 @@ public class StatisticsActivity extends AppCompatActivity {
                                 name.add((String) dsChild.getValue());
                             }
                         }
+                        if (name.size() > dates.size())
+                            name.remove(name.size()-1);
                     }
                     // tworzenie pozycji w recyclerView
                     for (int i = dates.size()-1; i >= 0; i--) {
