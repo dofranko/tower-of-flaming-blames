@@ -25,7 +25,7 @@ public class GameState {
         PLAYER_GRAVITY_VELOCITY = 0.4f;
         ACTUAL_DIFFICULTY  = 0;
         PLATFORM_MOVABLE_SPEED_Y = 2;
-        PLATFORM_MOVABLE_SPEED_X = 3;
+        PLATFORM_MOVABLE_SPEED_X = 1;
         PLATFORM_GAP_Y = (int)(SCREEN_HEIGHT / PLAYER_HEIGHT_PERCENTAGE * 1.8);
         PLATFORM_GAP_X = 100;
         MOVABLE_PLATFORMS_FREQUENCY  = 10;
@@ -87,11 +87,13 @@ public class GameState {
                     }
                     if(MAX_PLATFORM_LENGTH < 2) MAX_PLATFORM_LENGTH = 2;
                 }
-                if ((int)(PLATFORM_MOVABLE_SPEED_X * 1.5) == PLATFORM_MOVABLE_SPEED_X){
-                    PLATFORM_MOVABLE_SPEED_X++;
-                }
-                else{
-                    PLATFORM_MOVABLE_SPEED_X *= 1.5;
+                if (PLATFORM_MOVABLE_SPEED_X < 25) {
+                    if ((int)(PLATFORM_MOVABLE_SPEED_X * 1.5) == PLATFORM_MOVABLE_SPEED_X){
+                        PLATFORM_MOVABLE_SPEED_X++;
+                    }
+                    else{
+                        PLATFORM_MOVABLE_SPEED_X *= 1.5;
+                    }
                 }
                 if ((int)(PLATFORM_MOVABLE_SPEED_Y * 1.3) == PLATFORM_MOVABLE_SPEED_Y){
                     PLATFORM_MOVABLE_SPEED_Y++;
@@ -104,7 +106,7 @@ public class GameState {
                     PLATFORM_GAP_X = SCREEN_WIDTH /3;
                 }
             }
-            MOVABLE_PLATFORMS_FREQUENCY--;
+            MOVABLE_PLATFORMS_FREQUENCY++;
             COINS_FREQUENCY++;
             if(MOVABLE_PLATFORMS_FREQUENCY < 1) MOVABLE_PLATFORMS_FREQUENCY = 1;
         }

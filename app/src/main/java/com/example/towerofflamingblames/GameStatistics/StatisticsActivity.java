@@ -52,7 +52,7 @@ public class StatisticsActivity extends AppCompatActivity {
     // wyświetla najlepszych graczy w grze
     private void addTopPlayers() {
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
-        Query query = ref.child("Users").orderByChild("Highest/Scores").limitToLast(3);
+        Query query = ref.child("Users").orderByChild("Highest/Scores").limitToLast(100);
         query.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DataSnapshot dataSnapshot = task.getResult();
