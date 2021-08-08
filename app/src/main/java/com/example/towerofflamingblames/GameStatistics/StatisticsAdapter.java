@@ -31,10 +31,10 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         final StatisticsGame item = listData.get(position);
-        holder.email.setText(item.email);
-        holder.score.setText(item.score);
-        holder.name.setText(item.name);
-        holder.date.setText(item.date);
+        holder.leftUp.setText(item.leftUp);
+        holder.rightUp.setText(item.rightUp);
+        holder.leftDown.setText(item.leftDown);
+        holder.rightDown.setText(item.rightDown);
     }
 
     @Override
@@ -44,17 +44,17 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView email;
-        public TextView score;
-        public TextView name;
-        public TextView date;
+        public TextView leftUp;
+        public TextView rightUp;
+        public TextView leftDown;
+        public TextView rightDown;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            this.email = itemView.findViewById(R.id.email);
-            this.score = itemView.findViewById(R.id.score);
-            this.name = itemView.findViewById(R.id.name);
-            this.date = itemView.findViewById(R.id.date);
+            this.leftUp = itemView.findViewById(R.id.leftUp);
+            this.rightUp = itemView.findViewById(R.id.rightUp);
+            this.leftDown = itemView.findViewById(R.id.leftDown);
+            this.rightDown = itemView.findViewById(R.id.rightDown);
         }
     }
 }
