@@ -3,15 +3,17 @@ package com.example.towerofflamingblames.GameStatistics;
 // dane do wyświetlania w recycleView
 public class StatisticsGame {
 
-    public String email;
-    public String score;
-    public String name;
-    public String date;
+    public String leftUp;
+    public String rightUp;
+    public String leftDown;
+    public String rightDown;
 
-    public StatisticsGame(String email, String score, String name, String date) {
-        this.email = email;
-        this.score = score;
-        this.name = name;
-        this.date = date;
+    public StatisticsGame() { }
+
+    public StatisticsGame(String leftUp, String rightUp, String leftDown, String rightDown) {
+        this.leftUp = leftUp;
+        this.rightUp = rightUp;
+        this.leftDown = leftDown;
+        this.rightDown = rightDown;
     }
 }

@@ -23,7 +23,12 @@ public class StatisticsTypeActivity extends AppCompatActivity {
     public void onClickTopPlayers(View view) {
         Intent intent = new Intent(this, StatisticsActivity.class);
         intent.putExtra("type", "topPlayers");
-        intent.putExtra("userID", this.userID);
+        startActivity(intent);
+    }
+
+    public void onClickTopGames(View view) {
+        Intent intent = new Intent(this, StatisticsActivity.class);
+        intent.putExtra("type", "topGames");
         startActivity(intent);
     }
 

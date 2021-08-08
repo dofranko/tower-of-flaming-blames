@@ -1,5 +1,6 @@
 package com.example.towerofflamingblames;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -7,10 +8,12 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.example.towerofflamingblames.Data.GameData;
 import com.example.towerofflamingblames.GameStatistics.StatisticsTypeActivity;
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -19,15 +22,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int RC_SIGN_IN = 123;
+    private static final int RC_NICKNAME = 213;
     private static final int RC_GAME = 321;
-    private final FirebaseDatabase database = FirebaseDatabase.getInstance();
-    // dostępne metody logowania (mail)
-    private final List<AuthUI.IdpConfig> providers = Collections.singletonList(new AuthUI.IdpConfig.EmailBuilder().build());
+    private final DatabaseReference database = FirebaseDatabase.getInstance().getReference();
     // aktualny zalogowany user
     private FirebaseUser user = null;
 
@@ -37,88 +38,107 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
-    // tworzenie okna logowania
-    private void createLogin() {
-        startActivityForResult(
-                AuthUI.getInstance()
-                        .createSignInIntentBuilder()
-                        .setAvailableProviders(providers)
-                        .build(),
-                RC_SIGN_IN);
-    }
-
-    // powrót z okna logowania
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RC_SIGN_IN) {
-            if (resultCode == RESULT_OK) {
-                user = FirebaseAuth.getInstance().getCurrentUser();
-                if (this.user != null) {
-                    // tworzenie struktury bazy danych
-                    DatabaseReference myRef = database.getReference().child("Users").child(this.user.getUid());
-                    myRef.child("Name").setValue(this.user.getDisplayName());
-                    myRef.child("Email").setValue(this.user.getEmail());
-                    // zmiana interfesju gry
-                    Button btnAccount = findViewById(R.id.button4);
-                    Button btnStatistics = findViewById(R.id.button);
-                    btnAccount.setText("LOGOUT");
-                    btnStatistics.setVisibility(View.VISIBLE);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == RC_SIGN_IN) {
+                enableButtons(false);
+                changeUI(true);
+                this.user = FirebaseAuth.getInstance().getCurrentUser();
+                database.child("Users").orderByKey().equalTo(this.user.getUid()).get().
+                        addOnSuccessListener(task -> {
+                            if (task.getChildrenCount() == 0) {
+                                Intent intent = new Intent(this, NicknameActivity.class);
+                                startActivityForResult(intent, RC_NICKNAME);
+                            } else {
+                                enableButtons(true);
+                            }
+                        });
+            } else if (requestCode == RC_NICKNAME) {
+                enableButtons(true);
+                String nickname = data.getStringExtra("nickname");
+                UserProfileChangeRequest profileUpdate = new UserProfileChangeRequest.Builder()
+                        .setDisplayName(nickname)
+                        .build();
+                user.updateProfile(profileUpdate);
+                DatabaseReference myRef = database.child("Users/" + this.user.getUid());
+                myRef.child("Name").setValue(nickname);
+            } else if (requestCode == RC_GAME && this.user != null) {
+                Long coins = Long.valueOf(data.getStringExtra("coins"));
+                String date = LocalDateTime.now().toString().substring(0,19);
+                saveResultsInDatabase(coins, date);
+            }
+        } else if (resultCode == RESULT_CANCELED && requestCode == RC_NICKNAME) {
+            enableButtons(true);
+            logOut();
+        }
+    }
+
+    // zapisanie skończonej gry w bazie danych
+    private void saveResultsInDatabase(Long coins, String date) {
+        DatabaseReference myRefUser = database.child("Users/" + this.user.getUid());
+        // dodanie nowej pozycji gry w bazie z datą i punktami
+        DatabaseReference myRefGames = myRefUser.child("Games");
+        myRefGames.child(date).setValue(coins);
+        // w bazie jest przechowywane 10 ostatnich gier
+        myRefGames.get().addOnSuccessListener(task -> {
+            if (task.getChildrenCount() > 10) {
+                for (DataSnapshot ds : task.getChildren()) {
+                    ds.getRef().removeValue();
+                    break;
                 }
             }
-        } else if (requestCode == RC_GAME) {
-            if (resultCode == RESULT_OK && this.user != null) {
-                // odebranie liczby monet po skończonej grze
-                String coins = data.getStringExtra("coins");
-                DatabaseReference myRef = database.getReference().child("Users").child(this.user.getUid());
-                DatabaseReference myRefGames = myRef.child("Games");
-                // dodanie nowej pozycji gry w bazie z datą i punktami
-                myRefGames.child(LocalDateTime.now().toString().substring(0,19)).setValue(coins);
-                myRefGames.get().addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        DataSnapshot dataSnapshot = task.getResult();
-                        if (dataSnapshot != null) {
-                            // maksymalnie zapisuje 10 ostatnich gier gracza
-                            if (dataSnapshot.getChildrenCount() > 10) {
-                                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                                    ds.getRef().removeValue();
-                                    break;
-                                }
-                            }
-                            // wyciągnięcie gry z największą liczbą punktów
-                            int highestScores = 0;
-                            String date = "";
-                            for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                                if (ds.getValue() != null) {
-                                    int scores = Integer.parseInt((String) ds.getValue());
-                                    if (highestScores <= scores) {
-                                        highestScores = scores;
-                                        date = ds.getKey();
-                                    }
-                                }
-                            }
-                            final int currentHighestScores = highestScores;
-                            final String currentDate = date;
-                            myRef.child("Highest").child("Scores").get().addOnCompleteListener(secondTask -> {
-                                if (secondTask.isSuccessful()) {
-                                    int previousCoins = 0;
-                                    try {
-                                        previousCoins = secondTask.getResult().getValue(int.class);
-                                    } catch (NullPointerException ignored) { }
-                                    if (previousCoins <= currentHighestScores) {
-                                        myRef.child("Highest").child("Scores").setValue(currentHighestScores);
-                                        myRef.child("Highest").child("Date").setValue(currentDate);
-                                    }
-                                } else {
-                                    myRef.child("Highest").child("Scores").setValue(currentHighestScores);
-                                    myRef.child("Highest").child("Date").setValue(currentDate);
-                                }
-                            });
-                        }
+        });
+        // aktualizacja najwyższego wyniku gracza
+        DatabaseReference myRefHighest = myRefUser.child("Highest/Scores");
+        myRefHighest.get().addOnSuccessListener(task -> {
+            try {
+                if (task.getValue(int.class) <= coins) {
+                    task.getRef().removeValue();
+                    myRefUser.child("Highest/Date").setValue(date);
+                    myRefHighest.setValue(coins);
+                }
+            } catch (NullPointerException ignored) {
+                myRefUser.child("Highest/Date").setValue(date);
+                myRefHighest.setValue(coins);
+            }
+        });
+        // w bazie jest przechowywane 30 najlepszych gier
+        DatabaseReference myRefTopGames = database.child("TopGames");
+        myRefTopGames.push().setValue(new GameData(this.user.getDisplayName(), date, coins));
+        myRefTopGames.get().addOnSuccessListener(task -> {
+            if (task.getChildrenCount() > 30) {
+                myRefTopGames.orderByChild("scores").limitToFirst(1).get().addOnSuccessListener(task2 -> {
+                    for(DataSnapshot ds : task2.getChildren()) {
+                        myRefTopGames.child(ds.getKey()).removeValue();
                     }
                 });
             }
+        });
+    }
+
+    // zmienia interfejs w zależności czy gracz się zalogował
+    private void changeUI(boolean flag) {
+        Button btnLog = findViewById(R.id.btnLog);
+        Button btnStatistics = findViewById(R.id.btnStatistics);
+        Button btnDelete = findViewById(R.id.btnDelete);
+        if (flag) {
+            btnLog.setText("LOGOUT");
+            btnStatistics.setVisibility(View.VISIBLE);
+            btnDelete.setVisibility(View.VISIBLE);
+        } else {
+            btnLog.setText("LOGIN");
+            btnStatistics.setVisibility(View.GONE);
+            btnDelete.setVisibility(View.GONE);
         }
+    }
+
+    private void enableButtons(boolean flag) {
+        findViewById(R.id.btnPlay).setEnabled(flag);
+        findViewById(R.id.btnLog).setEnabled(flag);
+        findViewById(R.id.btnStatistics).setEnabled(flag);
+        findViewById(R.id.btnDelete).setEnabled(flag);
     }
 
     // otwiera nową aktywność z wyborem zobaczenia swoich statystyk, albo globalnych
@@ -137,29 +157,64 @@ public class MainActivity extends AppCompatActivity {
     // zarządzanie kontem (logowanie, wylogowanie)
     public void manageAccount(View view) {
         if (this.user == null) {
-            createLogin();
+            logIn();
         } else {
-            Button btn = (Button) view;
-            Button btnStatistics = findViewById(R.id.button);
-            AuthUI.getInstance()
-                    .signOut(this)
-                    .addOnCompleteListener(task -> {
-                    });
-            this.user = null;
-            btn.setText("LOGIN");
-            btnStatistics.setVisibility(View.GONE);
+            logOut();
         }
     }
 
-    // wylogowuje danego użytkownika
+    // tworzenie okna logowania
+    private void logIn() {
+        // dostępne metody logowania (mail)
+        AuthUI.IdpConfig emailSignIn = new AuthUI.IdpConfig.EmailBuilder().setRequireName(false).build();
+        List<AuthUI.IdpConfig> providers = Collections.singletonList(emailSignIn);
+        startActivityForResult(
+                AuthUI.getInstance()
+                        .createSignInIntentBuilder()
+                        .setAvailableProviders(providers)
+                        .setTheme(R.style.LoginTheme)
+                        .build(),
+                RC_SIGN_IN);
+    }
+
+    private void logOut() {
+        AuthUI.getInstance()
+                .signOut(this)
+                .addOnCompleteListener(task -> { });
+        this.user = null;
+        changeUI(false);
+    }
+
+    public void deleteAccount(View view) {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setMessage("Are you sure you want to delete your account?");
+        dialog.setTitle("Warning");
+        dialog.setPositiveButton("Yes", (dialog1, id) -> {
+            // usuwamy nasze dane w bazie
+            database.child("Users/" + user.getUid()).removeValue();
+            // usuwamy z najlepszych gier nasze własne gry
+            database.child("TopGames").orderByChild("name").equalTo(this.user.getDisplayName()).get()
+                    .addOnSuccessListener(task -> {
+                        for(DataSnapshot ds : task.getChildren()) {
+                            database.child("TopGames/" + ds.getKey()).removeValue();
+                        }
+                    });
+            user.delete();
+            user = null;
+            changeUI(false);
+        });
+        AlertDialog alertDialog = dialog.create();
+        alertDialog.show();
+    }
+
+    // dodatkowo wylogowuje danego użytkownika
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (this.user != null) {
             AuthUI.getInstance()
                     .signOut(this)
-                    .addOnCompleteListener(task -> {
-                    });
+                    .addOnCompleteListener(task -> { });
         }
     }
 }

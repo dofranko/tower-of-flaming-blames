@@ -12,6 +12,7 @@
         <activity android:name=".GameActivity" />
         <activity android:name=".GameStatistics.StatisticsActivity" />
         <activity android:name=".GameStatistics.StatisticsTypeActivity" />
+        <activity android:name=".NicknameActivity" />
         <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait"
