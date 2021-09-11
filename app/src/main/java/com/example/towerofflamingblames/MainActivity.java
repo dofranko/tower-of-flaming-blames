@@ -4,20 +4,27 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.example.towerofflamingblames.Data.GameData;
 import com.example.towerofflamingblames.GameStatistics.StatisticsTypeActivity;
 import com.firebase.ui.auth.AuthUI;
+import com.github.javiersantos.appupdater.AppUpdaterUtils;
+import com.github.javiersantos.appupdater.enums.AppUpdaterError;
+import com.github.javiersantos.appupdater.enums.UpdateFrom;
+import com.github.javiersantos.appupdater.objects.Update;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -36,6 +43,26 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        AppUpdaterUtils appUpdaterUtils = new AppUpdaterUtils(this)
+                .setUpdateFrom(UpdateFrom.GITHUB)
+                .setGitHubUserAndRepo("dofranko", "tower-of-flaming-blames")
+                .withListener(new AppUpdaterUtils.UpdateListener() {
+                    @Override
+                    public void onSuccess(Update update, Boolean isUpdateAvailable) {
+                        TextView appVersion = findViewById(R.id.appVersion);
+                        appVersion.setText("version: " + update.getLatestVersion());
+                        if (isUpdateAvailable) {
+                            informAboutNewVersionApp(update.getUrlToDownload().toString());
+                        }
+                    }
+
+                    @Override
+                    public void onFailed(AppUpdaterError error) {
+                        Log.d("AppUpdater Error", "Something went wrong");
+                    }
+                });
+        appUpdaterUtils.start();
     }
 
     @Override
@@ -216,5 +243,18 @@ public class MainActivity extends AppCompatActivity {
                     .signOut(this)
                     .addOnCompleteListener(task -> { });
         }
+    }
+
+    private void informAboutNewVersionApp(String url) {
+        AlertDialog newUpdateDialog = new AlertDialog.Builder(this)
+                .setTitle("New update available!")
+                .setMessage("Enjoy a new version of Tower of Flaming Blames!")
+                .setPositiveButton("Update", (dialog, which) -> {
+                    Intent launchBrowser = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(launchBrowser);
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> {})
+                .show();
+        newUpdateDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.RED);
     }
 }
