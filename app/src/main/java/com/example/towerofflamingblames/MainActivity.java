@@ -43,15 +43,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        TextView appVersion = findViewById(R.id.appVersion);
+        appVersion.setText("version: " + BuildConfig.VERSION_NAME);
+        
         AppUpdaterUtils appUpdaterUtils = new AppUpdaterUtils(this)
                 .setUpdateFrom(UpdateFrom.GITHUB)
                 .setGitHubUserAndRepo("dofranko", "tower-of-flaming-blames")
                 .withListener(new AppUpdaterUtils.UpdateListener() {
                     @Override
                     public void onSuccess(Update update, Boolean isUpdateAvailable) {
-                        TextView appVersion = findViewById(R.id.appVersion);
-                        appVersion.setText("version: " + update.getLatestVersion());
                         if (isUpdateAvailable) {
                             informAboutNewVersionApp(update.getUrlToDownload().toString());
                         }
