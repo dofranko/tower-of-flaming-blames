@@ -3,7 +3,11 @@ package com.example.towerofflamingblames;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -45,24 +49,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         TextView appVersion = findViewById(R.id.appVersion);
         appVersion.setText("version: " + BuildConfig.VERSION_NAME);
-        
-        AppUpdaterUtils appUpdaterUtils = new AppUpdaterUtils(this)
-                .setUpdateFrom(UpdateFrom.GITHUB)
-                .setGitHubUserAndRepo("dofranko", "tower-of-flaming-blames")
-                .withListener(new AppUpdaterUtils.UpdateListener() {
-                    @Override
-                    public void onSuccess(Update update, Boolean isUpdateAvailable) {
-                        if (isUpdateAvailable) {
-                            informAboutNewVersionApp(update.getUrlToDownload().toString());
-                        }
-                    }
-
-                    @Override
-                    public void onFailed(AppUpdaterError error) {
-                        Log.d("AppUpdater Error", "Something went wrong");
-                    }
-                });
-        appUpdaterUtils.start();
+        checkNewVersion();
     }
 
     @Override
@@ -245,16 +232,56 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void checkNewVersion() {
+        AppUpdaterUtils appUpdaterUtils = new AppUpdaterUtils(this)
+                .setUpdateFrom(UpdateFrom.GITHUB)
+                .setGitHubUserAndRepo("dofranko", "tower-of-flaming-blames")
+                .withListener(new AppUpdaterUtils.UpdateListener() {
+                    @Override
+                    public void onSuccess(Update update, Boolean isUpdateAvailable) {
+                        if (isUpdateAvailable) {
+                            informAboutNewVersionApp(update.getUrlToDownload().toString());
+                        }
+                    }
+
+                    @Override
+                    public void onFailed(AppUpdaterError error) {
+                        Log.d("AppUpdater Error", "Something went wrong");
+                    }
+                });
+        appUpdaterUtils.start();
+    }
+
     private void informAboutNewVersionApp(String url) {
         AlertDialog newUpdateDialog = new AlertDialog.Builder(this)
                 .setTitle("New update available!")
                 .setMessage("Enjoy a new version of Tower of Flaming Blames!")
-                .setPositiveButton("Update", (dialog, which) -> {
-                    Intent launchBrowser = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    startActivity(launchBrowser);
-                })
+                .setPositiveButton("Update", (dialog, which) -> downloadUpdate(url))
                 .setNegativeButton("Cancel", (dialog, which) -> {})
                 .show();
         newUpdateDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.RED);
+    }
+
+    private void downloadUpdate(String url) {
+        DownloadManager.Request request = new DownloadManager
+                .Request(Uri.parse(url + "/download/TowerOfFlamingBlames.apk"));
+        final DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+        final long downloadId = manager.enqueue(request);
+
+        BroadcastReceiver onComplete = new BroadcastReceiver() {
+            public void onReceive(Context ctxt, Intent intent) {
+                Intent install = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+                install.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                install.setDataAndType(
+                        manager.getUriForDownloadedFile(downloadId),
+                        manager.getMimeTypeForDownloadedFile(downloadId)
+                );
+                startActivity(install);
+                unregisterReceiver(this);
+                finish();
+            }
+        };
+
+        registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
     }
 }
